@@ -1,0 +1,20 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<h1>My Orders</h1>
+{% if orders %}
+    {% for order in orders %}
+    <div class="order-card">
+        <p><strong>Order #{{ order.id }}</strong> - {{ order.created_at|date:"M d, Y" }}</p>
+        <p>Total: ${{ order.total_amount }}</p>
+        <ul>
+        {% for item in order.items.all %}
+            <li>{{ item.quantity }} x {{ item.book.title }} @ ${{ item.price }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>You haven't placed any orders yet.</p>
+{% endif %}
+{% endblock %}

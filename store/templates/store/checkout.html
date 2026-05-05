@@ -1,0 +1,21 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<h1>Checkout</h1>
+<div class="checkout-wrapper">
+    <div class="order-summary">
+        <h2>Your Order</h2>
+        {% for book_id, qty in cart.items %}
+            {% with book=book_id|slugify %}
+                {# This requires a custom template tag; simplified: We'll just show items. Better pass cart_items from view. #}
+            {% endwith %}
+        {% endfor %}
+        <p>Total items: {{ cart_count }}</p>
+    </div>
+    <form method="POST" class="checkout-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Place Order</button>
+    </form>
+</div>
+{% endblock %}

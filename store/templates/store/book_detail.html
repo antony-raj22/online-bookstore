@@ -1,0 +1,21 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<div class="book-detail">
+    <div class="book-detail-image">
+        <img src="{{ book.cover_url }}" alt="{{ book.title }}">
+    </div>
+    <div class="book-detail-info">
+        <h1>{{ book.title }}</h1>
+        <h3>by {{ book.author }}</h3>
+        <p class="price">${{ book.price }}</p>
+        <p class="description">{{ book.description }}</p>
+        <p class="stock">Stock: {{ book.stock }}</p>
+        {% if book.stock > 0 %}
+            <a href="{% url 'add_to_cart' book.id %}" class="btn btn-large">Add to Cart</a>
+        {% else %}
+            <button disabled class="btn btn-large disabled">Out of Stock</button>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
