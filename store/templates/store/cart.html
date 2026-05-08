@@ -1,35 +1,88 @@
 {% extends 'store/base.html' %}
+{% block title %}Cart — Folio{% endblock %}
 
 {% block content %}
-<h1>Shopping Cart</h1>
+
+<div class="page-hero" style="padding-top:2.5rem; padding-bottom:1.5rem; margin-bottom:2rem;">
+  <span class="eyebrow">Your Selection</span>
+  <h1>Shopping Cart</h1>
+</div>
+
 {% if cart_items %}
-    <form method="POST" action="{% url 'update_cart' %}">
-        {% csrf_token %}
-        <table class="cart-table">
-            <thead>
-                <tr><th>Book</th><th>Price</th><th>Quantity</th><th>Subtotal</th><th></th></tr>
-            </thead>
-            <tbody>
-                {% for item in cart_items %}
-                <tr>
-                    <td>{{ item.book.title }}</td>
-                    <td>${{ item.book.price }}</td>
-                    <td>
-                        <input type="number" name="quantity_{{ item.book.id }}" value="{{ item.quantity }}" min="0" class="qty-input">
-                    </td>
-                    <td>${{ item.subtotal }}</td>
-                    <td><a href="{% url 'remove_from_cart' item.book.id %}" class="btn-remove">Remove</a></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <div class="cart-total">
-            <strong>Total: ${{ total }}</strong>
-        </div>
-        <button type="submit" class="btn">Update Cart</button>
-        <a href="{% url 'checkout' %}" class="btn btn-success">Proceed to Checkout</a>
-    </form>
+<form method="POST" action="{% url 'update_cart' %}">
+  {% csrf_token %}
+
+  <div class="cart-wrapper">
+
+    <!-- Items Table -->
+    <div>
+      <table class="cart-table">
+        <thead>
+          <tr>
+            <th>Book</th>
+            <th>Price</th>
+            <th>Qty</th>
+            <th>Subtotal</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in cart_items %}
+          <tr>
+            <td>
+              <span class="cart-book-title">{{ item.book.title }}</span>
+              <span class="cart-book-author">{{ item.book.author }}</span>
+            </td>
+            <td>${{ item.book.price }}</td>
+            <td>
+              <input type="number"
+                     name="quantity_{{ item.book.id }}"
+                     value="{{ item.quantity }}"
+                     min="0" max="99"
+                     class="qty-input">
+            </td>
+            <td style="font-family:var(--serif); font-weight:700; color:var(--gold-light)">
+              ${{ item.subtotal }}
+            </td>
+            <td>
+              <a href="{% url 'remove_from_cart' item.book.id %}" class="btn-remove">Remove</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div style="margin-top:1rem;">
+        <button type="submit" class="btn btn-dark">↻ Update Cart</button>
+      </div>
+    </div>
+
+    <!-- Summary Sidebar -->
+    <div class="cart-summary">
+      <h3>Order Summary</h3>
+      <div class="summary-row">
+        <span>Items ({{ cart_items|length }})</span><span>${{ total }}</span>
+      </div>
+      <div class="summary-row">
+        <span>Shipping</span><span>Free</span>
+      </div>
+      <div class="summary-row total">
+        <span>Total</span><span>${{ total }}</span>
+      </div>
+      <a href="{% url 'checkout' %}" class="btn btn-success">Checkout →</a>
+      <a href="{% url 'home' %}" class="btn btn-ghost">Continue Shopping</a>
+    </div>
+
+  </div>
+</form>
+
 {% else %}
-    <p>Your cart is empty. <a href="{% url 'home' %}">Continue shopping</a></p>
+<div class="empty-state">
+  <div class="empty-icon">🛒</div>
+  <h3>Your cart is empty</h3>
+  <p>Looks like you haven't added any books yet.</p>
+  <a href="{% url 'home' %}" class="btn btn-primary">Browse Books</a>
+</div>
 {% endif %}
+
 {% endblock %}

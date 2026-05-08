@@ -1,21 +1,43 @@
 {% extends 'store/base.html' %}
+{% block title %}{{ book.title }} — Folio{% endblock %}
 
 {% block content %}
+
 <div class="book-detail">
-    <div class="book-detail-image">
-        <img src="{{ book.cover_url }}" alt="{{ book.title }}">
+
+  <!-- Cover -->
+  <div class="book-detail-image">
+    <img src="{{ book.cover_url }}" alt="{{ book.title }}">
+  </div>
+
+  <!-- Info -->
+  <div class="book-detail-info">
+    <span class="eyebrow">{{ book.genre|default:"Fiction" }}</span>
+    <h1>{{ book.title }}</h1>
+    <p class="author-tag">by {{ book.author }}</p>
+
+    <div class="price-tag">${{ book.price }}</div>
+
+    <p class="description-text">{{ book.description }}</p>
+
+    {% if book.stock > 0 %}
+      <div class="stock-badge in-stock">✓ In Stock — {{ book.stock }} left</div>
+    {% else %}
+      <div class="stock-badge out-of-stock">✕ Out of Stock</div>
+    {% endif %}
+
+    <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+      {% if book.stock > 0 %}
+        <a href="{% url 'add_to_cart' book.id %}" class="btn btn-primary btn-large">
+          🛒 Add to Cart
+        </a>
+      {% else %}
+        <button disabled class="btn btn-dark btn-large disabled">Unavailable</button>
+      {% endif %}
+      <a href="{% url 'home' %}" class="btn btn-ghost btn-large">← Back</a>
     </div>
-    <div class="book-detail-info">
-        <h1>{{ book.title }}</h1>
-        <h3>by {{ book.author }}</h3>
-        <p class="price">${{ book.price }}</p>
-        <p class="description">{{ book.description }}</p>
-        <p class="stock">Stock: {{ book.stock }}</p>
-        {% if book.stock > 0 %}
-            <a href="{% url 'add_to_cart' book.id %}" class="btn btn-large">Add to Cart</a>
-        {% else %}
-            <button disabled class="btn btn-large disabled">Out of Stock</button>
-        {% endif %}
-    </div>
+  </div>
+
 </div>
+
 {% endblock %}

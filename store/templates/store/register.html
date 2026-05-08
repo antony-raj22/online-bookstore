@@ -1,11 +1,23 @@
-<!-- register.html -->
 {% extends 'store/base.html' %}
+{% block title %}Register — Folio{% endblock %}
 
 {% block content %}
-<h1>Register</h1>
+
 <form method="POST" class="auth-form">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn">Register</button>
+  {% csrf_token %}
+
+  <div class="form-title">Create account</div>
+  <div class="form-subtitle">Join Folio and start your reading journey</div>
+
+  {{ form.as_p }}
+
+  <button type="submit" class="btn btn-primary btn-large" style="width:100%; justify-content:center; margin-top:0.5rem;">
+    Create Account →
+  </button>
+
+  <div class="form-link">
+    Already have an account? <a href="{% url 'login' %}">Login</a>
+  </div>
 </form>
+
 {% endblock %}

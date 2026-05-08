@@ -1,13 +1,31 @@
-<!-- login.html -->
 {% extends 'store/base.html' %}
+{% block title %}Login — Folio{% endblock %}
 
 {% block content %}
-<h1>Login</h1>
+
 <form method="POST" class="auth-form">
-    {% csrf_token %}
-    <input type="text" name="username" placeholder="Username" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <button type="submit" class="btn">Login</button>
+  {% csrf_token %}
+
+  <div class="form-title">Welcome back</div>
+  <div class="form-subtitle">Sign in to your Folio account</div>
+
+  <div class="form-group">
+    <label for="id_username">Username</label>
+    <input type="text" name="username" id="id_username" placeholder="Your username" required>
+  </div>
+
+  <div class="form-group">
+    <label for="id_password">Password</label>
+    <input type="password" name="password" id="id_password" placeholder="••••••••" required>
+  </div>
+
+  <button type="submit" class="btn btn-primary btn-large" style="width:100%; justify-content:center; margin-top:0.5rem;">
+    Login →
+  </button>
+
+  <div class="form-link">
+    Don't have an account? <a href="{% url 'register' %}">Register here</a>
+  </div>
 </form>
-<p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+
 {% endblock %}

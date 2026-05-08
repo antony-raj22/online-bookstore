@@ -1,21 +1,44 @@
 {% extends 'store/base.html' %}
+{% block title %}Checkout — Folio{% endblock %}
 
 {% block content %}
-<h1>Checkout</h1>
-<div class="checkout-wrapper">
-    <div class="order-summary">
-        <h2>Your Order</h2>
-        {% for book_id, qty in cart.items %}
-            {% with book=book_id|slugify %}
-                {# This requires a custom template tag; simplified: We'll just show items. Better pass cart_items from view. #}
-            {% endwith %}
-        {% endfor %}
-        <p>Total items: {{ cart_count }}</p>
-    </div>
-    <form method="POST" class="checkout-form">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-success">Place Order</button>
-    </form>
+
+<div class="page-hero" style="padding-top:2.5rem; padding-bottom:1.5rem; margin-bottom:2rem;">
+  <span class="eyebrow">Almost there</span>
+  <h1>Checkout</h1>
 </div>
+
+<div class="checkout-layout">
+
+  <!-- Shipping / Payment Form -->
+  <div class="checkout-form-wrap">
+    <h2>Delivery Details</h2>
+    <form method="POST" class="checkout-form" style="background:transparent; border:none; padding:0; margin:0; max-width:100%; box-shadow:none;">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div style="margin-top:2rem;">
+        <button type="submit" class="btn btn-success btn-large" style="width:100%; justify-content:center;">
+          ✓ Place Order
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Order Summary -->
+  <div class="order-summary-box">
+    <h2>Your Order</h2>
+    {% for item in cart_items %}
+    <div class="order-item">
+      <span class="order-item-qty">×{{ item.quantity }}</span>
+      <span class="order-item-title">{{ item.book.title }}</span>
+      <span class="order-item-price">${{ item.subtotal }}</span>
+    </div>
+    {% endfor %}
+    <div class="summary-row total" style="margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--border);">
+      <span>Total</span><span>${{ total }}</span>
+    </div>
+  </div>
+
+</div>
+
 {% endblock %}
