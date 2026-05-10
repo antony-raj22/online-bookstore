@@ -1,0 +1,147 @@
+{% extends 'store/base.html' %}
+{% block title %}Subscribe — BookStore{% endblock %}
+
+
+
+<!-- ── HERO ─────────────────────────────────────────────── -->
+<div class="subscribe-hero">
+  <div class="subscribe-hero-bg"></div>
+  <div class="subscribe-hero-content">
+    <span class="sub-eyebrow"><i class="fa-solid fa-envelope-open-text"></i> BookStore Newsletter</span>
+    <h1>Stories Worth<br>Waking Up For</h1>
+    <p>Join 40,000+ readers who get hand-picked books, author interviews, and exclusive deals — every week, no spam.</p>
+  </div>
+</div>
+
+<!-- ── MAIN CARD ─────────────────────────────────────────── -->
+<div class="subscribe-card-wrap">
+  <div class="subscribe-card">
+
+    <!-- LEFT: Form -->
+    <div class="subscribe-card-left">
+      <h2><i class="fa-solid fa-paper-plane"></i> Get the Weekly Read</h2>
+      <p class="sub-desc">Drop your email and join a community of passionate readers. Unsubscribe anytime — no hard feelings.</p>
+
+      <form method="POST" action="{% url 'subscribe' %}" class="sub-form" id="subscribeForm">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-error">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="sub-input-row">
+          <div class="sub-field">
+            <label for="sub_name"><i class="fa-solid fa-user fa-fw"></i> Your Name</label>
+            <input type="text" id="sub_name" name="name"
+                   placeholder="e.g. Priya Sharma"
+                   value="{{ form.name.value|default:'' }}">
+            {% if form.name.errors %}
+              <ul class="field-errors">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+          <div class="sub-field">
+            <label for="sub_email"><i class="fa-solid fa-envelope fa-fw"></i> Email Address <span style="color:var(--red)">*</span></label>
+            <input type="email" id="sub_email" name="email"
+                   placeholder="you@example.com" required
+                   value="{{ form.email.value|default:'' }}">
+            {% if form.email.errors %}
+              <ul class="field-errors">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="sub-interests">
+          <p class="sub-interests-label">
+            <i class="fa-solid fa-heart fa-fw"></i> What do you love reading? <em>(pick any)</em>
+          </p>
+          <div class="sub-tags">
+            <label class="sub-tag"><input type="checkbox" name="genre" value="fiction">    📖 Fiction</label>
+            <label class="sub-tag"><input type="checkbox" name="genre" value="nonfiction"> 🔬 Non-Fiction</label>
+            <label class="sub-tag"><input type="checkbox" name="genre" value="thriller">   🔪 Thriller</label>
+            <label class="sub-tag"><input type="checkbox" name="genre" value="scifi">      🚀 Sci-Fi</label>
+            <label class="sub-tag"><input type="checkbox" name="genre" value="romance">    💌 Romance</label>
+            <label class="sub-tag"><input type="checkbox" name="genre" value="biography">  🏆 Biography</label>
+            <label class="sub-tag"><input type="checkbox" name="genre" value="children">   🧸 Children</label>
+            <label class="sub-tag"><input type="checkbox" name="genre" value="academic">   🎓 Academic</label>
+            <label class="sub-tag"><input type="checkbox" name="genre" value="selfhelp">   💡 Self-Help</label>
+            <label class="sub-tag"><input type="checkbox" name="genre" value="cooking">    🍳 Cooking</label>
+          </div>
+        </div>
+
+        <button type="submit" class="sub-submit-btn">
+          <i class="fa-solid fa-paper-plane"></i> Subscribe — It's Free ✨
+        </button>
+        
+        <p class="sub-disclaimer">
+          <i class="fa-solid fa-shield-halved"></i> No spam. Unsubscribe in one click. Your data stays private.
+        </p>
+      </form>
+    </div>
+
+    <!-- RIGHT: Perks -->
+    <div class="subscribe-card-right">
+      <div class="perks-title"><i class="fa-solid fa-gift"></i> What you'll get</div>
+      <ul class="perks-list">
+        <li class="perk-item">
+          <span class="perk-icon">📚</span>
+          <div>
+            <strong>Weekly Book Picks</strong>
+            <span>Curated titles based on your genre preferences</span>
+          </div>
+        </li>
+        <li class="perk-item">
+          <span class="perk-icon">🏷️</span>
+          <div>
+            <strong>Exclusive Deals</strong>
+            <span>Subscriber-only discounts up to 40% off</span>
+          </div>
+        </li>
+        <li class="perk-item">
+          <span class="perk-icon">✍️</span>
+          <div>
+            <strong>Author Spotlights</strong>
+            <span>Behind-the-book interviews &amp; excerpts</span>
+          </div>
+        </li>
+        <li class="perk-item">
+          <span class="perk-icon">🎁</span>
+          <div>
+            <strong>10% Off First Order</strong>
+            <span>Instant coupon delivered on confirmation</span>
+          </div>
+        </li>
+        <li class="perk-item">
+          <span class="perk-icon">🔔</span>
+          <div>
+            <strong>New Arrival Alerts</strong>
+            <span>First to know when your favourite authors publish</span>
+          </div>
+        </li>
+      </ul>
+
+      <div class="sub-social-proof">
+        <div class="sub-avatars">
+          <img src="https://i.pravatar.cc/36?img=1"  alt="reader">
+          <img src="https://i.pravatar.cc/36?img=5"  alt="reader">
+          <img src="https://i.pravatar.cc/36?img=9"  alt="reader">
+          <img src="https://i.pravatar.cc/36?img=13" alt="reader">
+        </div>
+        <span><strong>40,000+</strong> happy readers already in</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── TRUST STRIP ───────────────────────────────────────── -->
+<div class="trust-strip">
+  <div class="trust-item"><i class="fa-solid fa-shield-halved"></i> 100% Secure &amp; Private</div>
+  <div class="trust-sep">·</div>
+  <div class="trust-item"><i class="fa-solid fa-envelope"></i> Weekly Delivery</div>
+  <div class="trust-sep">·</div>
+  <div class="trust-item"><i class="fa-solid fa-ban"></i> Zero Spam Guarantee</div>
+  <div class="trust-sep">·</div>
+  <div class="trust-item"><i class="fa-solid fa-credit-card"></i> No Credit Card Needed</div>
+</div>
+
+{% endblock %}
