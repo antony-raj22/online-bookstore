@@ -1,94 +1,80 @@
 {% extends 'store/base.html' %}
-{% block title %}{{ category_name }} Books — BookStore{% endblock %}
+
+{% block title %}{{ category_name }} | BookStore{% endblock %}
+
+{% block genre_subnav %}
+<nav class="genre-subnav">
+  <div class="container">
+    <div class="genre-subnav-inner">
+      <a href="{% url 'category_list' %}" class="genre-pill">
+        <span>📚</span> All Categories
+      </a>
+      <!-- Add other genre pills here similar to Category.html -->
+      {% for slug, meta in all_categories.items %}
+        <a href="{% url 'category_detail' slug=slug %}" 
+           class="genre-pill {% if active_slug == slug %}active{% endif %}">
+          <span>{{ meta.icon }}</span> {{ meta.name }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</nav>
+{% endblock %}
 
 {% block content %}
-
-<!-- ══ HEADER ════════════════════════════════════════════ -->
+<!-- Category detail header -->
 <div class="cat-detail-header">
-  <a href="{% url 'category_list' %}" class="cat-back-link">
-    <i class="fa-solid fa-arrow-left"></i> All Categories
-  </a>
-  <div class="cat-detail-icon">{{ category_icon|default:"📚" }}</div>
-  <h1>{{ category_name|default:"Books" }}</h1>
-  <p>{{ category_desc|default:"Explore our full collection in this category." }}</p>
-  <span class="cat-total-badge"><i class="fa-solid fa-book"></i> {{ books|length }} titles</span>
+  <div class="cat-detail-left">
+    <a href="{% url 'category_list' %}" class="cat-back-link">
+      <i class="fa-solid fa-arrow-left"></i> All Categories
+    </a>
+    <div class="cat-detail-icon">{{ category_icon }}</div>
+    <h1>{{ category_name }}</h1>
+    <p>{{ category_desc }}</p>
+    <span class="cat-total-badge">{{ books|length }} book{{ books|length|pluralize }}</span>
+  </div>
 </div>
 
-<!-- ══ FILTERS BAR ════════════════════════════════════════ -->
+<!-- Sort filters -->
 <div class="cat-filters-bar">
   <div class="filter-group">
-    <span class="filter-label"><i class="fa-solid fa-arrow-up-wide-short"></i> Sort:</span>
-    <a href="?sort=popular"    class="filter-pill {% if not request.GET.sort or request.GET.sort == 'popular' %}active{% endif %}">🔥 Popular</a>
-    <a href="?sort=new"        class="filter-pill {% if request.GET.sort == 'new' %}active{% endif %}">🆕 Newest</a>
-    <a href="?sort=price_asc"  class="filter-pill {% if request.GET.sort == 'price_asc' %}active{% endif %}">💲 Price ↑</a>
-    <a href="?sort=price_desc" class="filter-pill {% if request.GET.sort == 'price_desc' %}active{% endif %}">💰 Price ↓</a>
-    <a href="?sort=az"         class="filter-pill {% if request.GET.sort == 'az' %}active{% endif %}">🔤 A – Z</a>
+    <span class="filter-label">Sort:</span>
+    <a href="?sort=popular" class="filter-pill {% if not request.GET.sort or request.GET.sort == 'popular' %}active{% endif %}">Popular</a>
+    <a href="?sort=new" class="filter-pill {% if request.GET.sort == 'new' %}active{% endif %}">Newest</a>
+    <a href="?sort=price_asc" class="filter-pill {% if request.GET.sort == 'price_asc' %}active{% endif %}">Price ↑</a>
+    <a href="?sort=price_desc" class="filter-pill {% if request.GET.sort == 'price_desc' %}active{% endif %}">Price ↓</a>
+    <a href="?sort=az" class="filter-pill {% if request.GET.sort == 'az' %}active{% endif %}">A-Z</a>
   </div>
-  <div class="filter-count"><i class="fa-solid fa-book fa-fw"></i> {{ books|length }} results</div>
 </div>
 
-<!-- ══ BOOKS GRID ═════════════════════════════════════════ -->
-<div class="books-grid cat-books-grid">
+<!-- Books -->
+{% if books %}
+<div class="books-grid">
   {% for book in books %}
-  <div class="book-card">
-    <div class="book-cover-wrap">
-      <img src="{{ book.cover_url }}" alt="{{ book.title }}" class="book-cover"
-           onerror="this.src='https://images.unsplash.com/photo-1512820790803-83ca734da794?w=190&h=240&fit=crop'" loading="lazy">
-      {% if book.is_new %}<span class="book-badge new">New</span>{% endif %}
-      {% if book.stock == 0 %}<span class="book-badge oos">Sold Out</span>{% endif %}
+    <div class="book-card">
+      <a href="{% url 'book_detail' book.id %}">
+        <div class="book-card-img-wrap">
+          {% if book.cover_image %}
+            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="book-cover">
+          {% else %}
+            <div class="book-cover" style="background: var(--border);">📖</div>
+          {% endif %}
+        </div>
+        <div class="book-info">
+          <h3 class="book-title">{{ book.title }}</h3>
+          <p class="book-author">{{ book.author }}</p>
+          <p class="book-price">${{ book.price }}</p>
+        </div>
+      </a>
     </div>
-    <div class="book-info">
-      <div class="book-genre-tag">{{ book.get_genre_display_name }}</div>
-      <div class="book-title">{{ book.title }}</div>
-      <div class="book-author"><i class="fa-solid fa-pen-nib"></i> {{ book.author }}</div>
-      <div class="book-price">${{ book.price }}</div>
-      <div class="book-card-actions">
-        <a href="{% url 'book_detail' book.id %}" class="btn-small"><i class="fa-solid fa-eye"></i> View</a>
-        {% if book.stock > 0 %}
-          <a href="{% url 'add_to_cart' book.id %}" class="btn-small btn-add-cart"><i class="fa-solid fa-cart-plus"></i> Add</a>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-  {% empty %}
-  <div class="empty-state" style="grid-column:1/-1">
-    <div class="empty-icon">📭</div>
-    <h3>No books in this category yet</h3>
-    <p>We're adding new titles all the time. Check back soon!</p>
-    <a href="{% url 'home' %}" class="btn-primary"><i class="fa-solid fa-house"></i> Browse All Books</a>
-  </div>
   {% endfor %}
 </div>
-
-<!-- ══ PAGINATION ═══════════════════════════════════════== -->
-{% if books.has_other_pages %}
-<div class="pagination-bar">
-  {% if books.has_previous %}
-    <a href="?page={{ books.previous_page_number }}" class="page-btn"><i class="fa-solid fa-chevron-left"></i> Prev</a>
-  {% endif %}
-  {% for num in books.paginator.page_range %}
-    <a href="?page={{ num }}" class="page-btn {% if books.number == num %}active{% endif %}">{{ num }}</a>
-  {% endfor %}
-  {% if books.has_next %}
-    <a href="?page={{ books.next_page_number }}" class="page-btn">Next <i class="fa-solid fa-chevron-right"></i></a>
-  {% endif %}
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">📖</div>
+  <h3>No books found</h3>
+  <p>Check back later for new titles in this category.</p>
 </div>
 {% endif %}
-
-<!-- ══ RELATED CATEGORIES ═══════════════════════════════== -->
-<div class="related-cats">
-  <h3><i class="fa-solid fa-compass"></i> Explore More Categories</h3>
-  <div class="related-cats-pills">
-    <a href="{% url 'category_detail' 'fiction' %}"    class="rel-pill">📖 Fiction</a>
-    <a href="{% url 'category_detail' 'thriller' %}"   class="rel-pill">🔪 Thriller</a>
-    <a href="{% url 'category_detail' 'nonfiction' %}" class="rel-pill">🔬 Non-Fiction</a>
-    <a href="{% url 'category_detail' 'selfhelp' %}"   class="rel-pill">💡 Self-Help</a>
-    <a href="{% url 'category_detail' 'biography' %}"  class="rel-pill">🏆 Biography</a>
-    <a href="{% url 'category_detail' 'romance' %}"    class="rel-pill">💌 Romance</a>
-    <a href="{% url 'category_list' %}" class="rel-pill" style="background:var(--red); color:white;">
-      <i class="fa-solid fa-layer-group"></i> All Categories →
-    </a>
-  </div>
-</div>
 
 {% endblock %}

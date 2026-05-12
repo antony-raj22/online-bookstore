@@ -1282,3 +1282,105 @@ input.error, select.error, textarea.error {
   .sp-divider { display: none; }
   .subscribe-hero { padding: 3rem 1.5rem; }
 }
+/* ============================================================
+   GENRE SUB-NAVBAR
+   Add these rules to the bottom of style.css
+   ============================================================ */
+
+/* ─── Sub-navbar shell ────────────────────────────────────── */
+.genre-subnav {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  position: sticky;
+  /* sits just below the main navbar (~65px tall) */
+  top: 65px;
+  z-index: 190;
+  padding: 0;
+}
+
+/* Scrollable pill row */
+.genre-subnav-inner {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 0;
+  overflow-x: auto;
+  scrollbar-width: none;          /* Firefox */
+  -ms-overflow-style: none;       /* IE/Edge */
+  scroll-behavior: smooth;
+}
+.genre-subnav-inner::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+/* ─── Individual genre pill ───────────────────────────────── */
+.genre-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 16px;
+  border-radius: 40px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--mid);
+  white-space: nowrap;
+  border: 1.5px solid transparent;
+  text-decoration: none;
+  transition: background var(--trans), color var(--trans),
+              border-color var(--trans), transform var(--trans);
+  flex-shrink: 0;
+}
+.genre-pill:hover {
+  background: var(--red-light);
+  color: var(--red);
+  border-color: rgba(196,69,44,0.2);
+  transform: translateY(-1px);
+}
+.genre-pill.active {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+}
+.genre-pill span {
+  /* hide label text on very small screens, keep emoji */
+  display: inline;
+}
+
+/* ─── Inline category hero (replaces old page-banner) ────── */
+.cat-inline-hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.6rem 0 0.6rem;
+  margin-bottom: 1.2rem;
+  border-bottom: 1px solid var(--border);
+}
+.cat-inline-icon {
+  font-size: 2.4rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.cat-inline-title {
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+.cat-inline-desc {
+  font-size: 0.9rem;
+  color: var(--mid);
+}
+
+/* ─── Responsive tweaks ───────────────────────────────────── */
+@media (max-width: 768px) {
+  .genre-subnav {
+    /* navbar stacks taller on mobile (~110px) */
+    top: 110px;
+  }
+  .genre-pill span {
+    /* hide text labels, keep emoji only, on narrow screens */
+    display: none;
+  }
+  .genre-pill {
+    padding: 6px 10px;
+    font-size: 1rem;  /* emoji looks better slightly larger */
+  }
+}
