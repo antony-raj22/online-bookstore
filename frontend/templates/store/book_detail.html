@@ -25,6 +25,14 @@
 
     <div class="book-detail-actions">
       {% if book.stock > 0 %}
+        <a href="{% url 'add_to_cart' book.id %}"
+           class="btn-secondary btn-large"
+           data-modal-title="Add to cart?"
+           data-modal-text="Add {{ book.title }} to your shopping cart."
+           data-modal-icon="fa-cart-plus"
+           data-modal-confirm="Add to Cart">
+          <i class="fa-solid fa-cart-plus"></i> Add to Cart
+        </a>
         <a href="{% url 'buy_now' book.id %}" class="btn-primary btn-large">
           <i class="fa-solid fa-bolt"></i> Buy Now
         </a>

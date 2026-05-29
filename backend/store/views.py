@@ -388,7 +388,7 @@ def payment(request, order_id):
             ])
             request.session['cart'] = {}
             request.session.pop('pending_order_id', None)
-            messages.success(request, 'Payment successful. Your bill is ready.')
+            messages.success(request, 'Payment complete. Your order has been placed successfully.')
             return redirect('bill', order_id=order.id)
 
         order.payment_status = 'failed'

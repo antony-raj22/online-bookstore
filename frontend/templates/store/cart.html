@@ -9,7 +9,7 @@
 </div>
 
 {% if cart_items %}
-<form method="POST" action="{% url 'update_cart' %}">
+<form method="POST" action="{% url 'update_cart' %}" id="cartUpdateForm" data-auto-refresh="true">
   {% csrf_token %}
 
   <div class="cart-wrapper">

@@ -12,11 +12,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 4000);
   });
 
+  const cartUpdateForm = document.getElementById('cartUpdateForm');
+  let cartRefreshTimer = null;
+
   document.querySelectorAll('.qty-input').forEach(input => {
     input.addEventListener('change', function () {
       const val = parseInt(this.value, 10);
       if (isNaN(val) || val < 0) this.value = 0;
       if (val > 99) this.value = 99;
+
+      if (cartUpdateForm && cartUpdateForm.dataset.autoRefresh === 'true') {
+        window.clearTimeout(cartRefreshTimer);
+        cartRefreshTimer = window.setTimeout(() => {
+          cartUpdateForm.requestSubmit();
+        }, 450);
+      }
     });
   });
 

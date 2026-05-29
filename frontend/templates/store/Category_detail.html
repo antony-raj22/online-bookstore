@@ -61,6 +61,14 @@
         <div class="book-price amount-highlight">₹{{ book.price }}</div>
         <div class="book-card-actions">
           {% if book.stock > 0 %}
+          <a href="{% url 'add_to_cart' book.id %}"
+             class="btn-small btn-add-cart"
+             data-modal-title="Add to cart?"
+             data-modal-text="Add {{ book.title }} to your shopping cart."
+             data-modal-icon="fa-cart-plus"
+             data-modal-confirm="Add to Cart">
+            <i class="fa-solid fa-cart-plus"></i> Add Cart
+          </a>
           <a href="{% url 'buy_now' book.id %}" class="btn-small btn-buy-now">
             <i class="fa-solid fa-bolt"></i> Buy Now
           </a>
