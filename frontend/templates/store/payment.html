@@ -1,0 +1,97 @@
+{% extends 'store/base.html' %}
+{% block title %}Payment | BookStore{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <span class="eyebrow">Secure payment</span>
+  <h1>Pay for Order #{{ order.id }}</h1>
+</div>
+
+<div class="payment-layout">
+  <section class="payment-panel">
+    <div class="payment-method-badge">
+      <i class="fa-solid fa-shield-halved"></i>
+      Razorpay Secure Checkout
+    </div>
+
+    <div class="razorpay-box">
+      <div class="razorpay-amount">
+        <span>Amount to pay</span>
+        <strong>₹{{ order.total_amount }}</strong>
+      </div>
+      <p>Pay safely using UPI, cards, net banking, or wallets through Razorpay.</p>
+    </div>
+
+    <form method="POST" class="checkout-form embedded-form" id="razorpayPaymentForm">
+      {% csrf_token %}
+      <input type="hidden" name="razorpay_order_id" id="razorpay_order_id" value="{{ order.razorpay_order_id }}">
+      <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+      <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+
+      {% if demo_payment_enabled %}
+        <input type="hidden" name="demo_payment" value="1">
+        <button type="submit" class="btn-success btn-large payment-button">
+          <i class="fa-solid fa-flask"></i> Demo Pay ₹{{ order.total_amount }}
+        </button>
+        <p class="payment-helper">Add Razorpay keys in environment variables to enable live Razorpay checkout.</p>
+      {% else %}
+        <button type="button" class="btn-success btn-large payment-button" id="razorpayPayButton">
+          <i class="fa-solid fa-lock"></i> Pay with Razorpay
+        </button>
+      {% endif %}
+    </form>
+  </section>
+
+  <aside class="order-summary">
+    <h2>Payment Summary</h2>
+    {% for item in order.items.all %}
+    <div class="order-item">
+      <span class="order-item-qty">x{{ item.quantity }}</span>
+      <span class="order-item-title">{{ item.book.title }}</span>
+      <span class="order-item-price">₹{{ item.price }}</span>
+    </div>
+    {% endfor %}
+    <div class="summary-row total">
+      <span>Total</span><span>₹{{ order.total_amount }}</span>
+    </div>
+  </aside>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if not demo_payment_enabled %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const payButton = document.getElementById('razorpayPayButton');
+    const paymentForm = document.getElementById('razorpayPaymentForm');
+    if (!payButton || !paymentForm) return;
+
+    const options = {
+      key: '{{ razorpay_key_id }}',
+      amount: '{{ razorpay_amount }}',
+      currency: '{{ razorpay_currency }}',
+      name: 'BookStore',
+      description: 'Order #{{ order.id }}',
+      order_id: '{{ order.razorpay_order_id }}',
+      prefill: {
+        name: '{{ order.full_name|escapejs }}',
+        email: '{{ request.user.email|escapejs }}'
+      },
+      theme: { color: '#c4452c' },
+      handler(response) {
+        document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+        document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
+        document.getElementById('razorpay_signature').value = response.razorpay_signature;
+        paymentForm.submit();
+      }
+    };
+
+    payButton.addEventListener('click', () => {
+      const checkout = new Razorpay(options);
+      checkout.open();
+    });
+  });
+</script>
+{% endif %}
+{% endblock %}

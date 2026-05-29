@@ -1,0 +1,41 @@
+{% extends 'store/base.html' %}
+{% block title %}{{ book.title }} | BookStore{% endblock %}
+
+{% block content %}
+
+<div class="book-detail">
+  <div class="book-detail-image">
+    <img src="{{ book.cover_url }}" alt="{{ book.title }}">
+  </div>
+
+  <div class="book-detail-info">
+    <span class="eyebrow">{{ book.get_genre_display_name|default:"Fiction" }}</span>
+    <h1>{{ book.title }}</h1>
+    <p class="author-tag">by {{ book.author }}</p>
+
+    <div class="price-tag amount-highlight">₹{{ book.price }}</div>
+
+    <p class="description-text">{{ book.description }}</p>
+
+    {% if book.stock > 0 %}
+      <div class="stock-badge in-stock"><i class="fa-solid fa-check"></i> In Stock - {{ book.stock }} left</div>
+    {% else %}
+      <div class="stock-badge out-of-stock"><i class="fa-solid fa-xmark"></i> Out of Stock</div>
+    {% endif %}
+
+    <div class="book-detail-actions">
+      {% if book.stock > 0 %}
+        <a href="{% url 'buy_now' book.id %}" class="btn-primary btn-large">
+          <i class="fa-solid fa-bolt"></i> Buy Now
+        </a>
+      {% else %}
+        <button disabled class="btn-dark btn-large disabled">Unavailable</button>
+      {% endif %}
+      <a href="{% url 'home' %}" class="btn-secondary btn-large">
+        <i class="fa-solid fa-arrow-left"></i> Back
+      </a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
