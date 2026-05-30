@@ -934,6 +934,14 @@ textarea { resize: vertical; min-height: 100px; }
   box-shadow: var(--shadow-sm);
 }
 
+.social-disabled,
+.social-disabled:hover {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .social-google:hover {
   border-color: #4285F4;
   background: #f8faff;
@@ -2080,7 +2088,18 @@ textarea { resize: vertical; min-height: 100px; }
 
 .cart-update-row {
   justify-content: flex-end;
+  gap: 0.75rem;
   margin-top: 1rem;
+}
+
+.cart-auto-status {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.cart-auto-status.is-error {
+  color: #c62828;
 }
 
 .cart-summary .btn-success,

@@ -13,20 +13,85 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const cartUpdateForm = document.getElementById('cartUpdateForm');
+  const cartAutoStatus = document.getElementById('cartAutoStatus');
+  const formatRupees = value => {
+    const amount = Number.parseFloat(value || 0);
+    return `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+  const setCartStatus = (message, isError = false) => {
+    if (!cartAutoStatus) return;
+    cartAutoStatus.textContent = message;
+    cartAutoStatus.classList.toggle('is-error', isError);
+  };
+  const applyCartPayload = payload => {
+    if (!payload || !Array.isArray(payload.items)) return;
+    const seenBookIds = new Set();
+
+    payload.items.forEach(item => {
+      seenBookIds.add(String(item.book_id));
+      const row = document.querySelector(`[data-cart-row="${item.book_id}"]`);
+      const quantityInput = row ? row.querySelector('.qty-input') : null;
+      const subtotal = document.querySelector(`[data-cart-subtotal="${item.book_id}"]`);
+      if (quantityInput) quantityInput.value = item.quantity;
+      if (subtotal) subtotal.textContent = formatRupees(item.subtotal);
+    });
+
+    document.querySelectorAll('[data-cart-row]').forEach(row => {
+      if (!seenBookIds.has(row.dataset.cartRow)) row.remove();
+    });
+
+    const itemLabel = document.getElementById('cartItemsLabel');
+    const itemAmount = document.getElementById('cartItemsAmount');
+    const totalAmount = document.getElementById('cartTotalAmount');
+    const navCount = document.querySelector('.cart-count');
+
+    if (itemLabel) itemLabel.textContent = `Items (${payload.item_count})`;
+    if (itemAmount) itemAmount.textContent = formatRupees(payload.total);
+    if (totalAmount) totalAmount.textContent = formatRupees(payload.total);
+    if (navCount) navCount.textContent = payload.item_count;
+    if (payload.item_count === 0) window.location.reload();
+  };
   let cartRefreshTimer = null;
+  const refreshCart = () => {
+    if (!cartUpdateForm || cartUpdateForm.dataset.autoRefresh !== 'true') return;
+    window.clearTimeout(cartRefreshTimer);
+    cartRefreshTimer = window.setTimeout(async () => {
+      setCartStatus('Updating...');
+      try {
+        const response = await fetch(cartUpdateForm.action, {
+          method: 'POST',
+          body: new FormData(cartUpdateForm),
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          credentials: 'same-origin',
+        });
+        if (!response.ok) throw new Error('Cart update failed');
+        applyCartPayload(await response.json());
+        setCartStatus('Cart updated');
+      } catch (error) {
+        setCartStatus('Auto update failed. Use Update Cart.', true);
+      }
+    }, 500);
+  };
+
+  if (cartUpdateForm && cartUpdateForm.dataset.autoRefresh === 'true') {
+    cartUpdateForm.addEventListener('submit', event => {
+      event.preventDefault();
+      refreshCart();
+    });
+  }
 
   document.querySelectorAll('.qty-input').forEach(input => {
-    input.addEventListener('change', function () {
+    const normalizeQuantity = function () {
       const val = parseInt(this.value, 10);
+      const max = parseInt(this.max, 10);
       if (isNaN(val) || val < 0) this.value = 0;
-      if (val > 99) this.value = 99;
+      if (!isNaN(max) && val > max) this.value = max;
+    };
 
-      if (cartUpdateForm && cartUpdateForm.dataset.autoRefresh === 'true') {
-        window.clearTimeout(cartRefreshTimer);
-        cartRefreshTimer = window.setTimeout(() => {
-          cartUpdateForm.requestSubmit();
-        }, 450);
-      }
+    input.addEventListener('input', refreshCart);
+    input.addEventListener('change', function () {
+      normalizeQuantity.call(this);
+      refreshCart();
     });
   });
 

@@ -26,7 +26,7 @@
         </thead>
         <tbody>
           {% for item in cart_items %}
-          <tr>
+          <tr data-cart-row="{{ item.book.id }}">
             <td>
               <span class="cart-book-title">{{ item.book.title }}</span>
               <span class="cart-book-author">{{ item.book.author }}</span>
@@ -36,10 +36,10 @@
               <input type="number"
                      name="quantity_{{ item.book.id }}"
                      value="{{ item.quantity }}"
-                     min="0" max="99"
+                     min="0" max="{{ item.book.stock }}"
                      class="qty-input">
             </td>
-            <td class="cart-subtotal">₹{{ item.subtotal }}</td>
+            <td class="cart-subtotal" data-cart-subtotal="{{ item.book.id }}">₹{{ item.subtotal }}</td>
             <td>
               <a href="{% url 'remove_from_cart' item.book.id %}"
                  class="btn-remove"
@@ -54,6 +54,7 @@
       </table>
 
       <div class="cart-update-row">
+        <span class="cart-auto-status" id="cartAutoStatus" aria-live="polite"></span>
         <button type="submit" class="btn-dark">
           <i class="fa-solid fa-rotate"></i> Update Cart
         </button>
@@ -63,13 +64,13 @@
     <div class="cart-summary">
       <h3>Order Summary</h3>
       <div class="summary-row">
-        <span>Items ({{ cart_items|length }})</span><span>₹{{ total }}</span>
+        <span id="cartItemsLabel">Items ({{ cart_count }})</span><span id="cartItemsAmount">₹{{ total }}</span>
       </div>
       <div class="summary-row">
         <span>Shipping</span><span>Free</span>
       </div>
       <div class="summary-row total">
-        <span>Total</span><span>₹{{ total }}</span>
+        <span>Total</span><span id="cartTotalAmount">₹{{ total }}</span>
       </div>
       <a href="{% url 'checkout' %}" class="btn-success">Checkout <i class="fa-solid fa-arrow-right"></i></a>
       <a href="{% url 'home' %}" class="btn-secondary">Continue Shopping</a>

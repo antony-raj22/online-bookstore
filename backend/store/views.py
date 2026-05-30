@@ -11,6 +11,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
 from django.db.models import Count, Q, Sum
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.crypto import get_random_string
 
@@ -50,6 +51,23 @@ def _build_cart_items(cart):
         total += subtotal
         items.append({'book': book, 'quantity': quantity, 'subtotal': subtotal})
     return items, total
+
+
+def _cart_json_payload(cart):
+    cart_items, total = _build_cart_items(cart)
+    return {
+        'items': [
+            {
+                'book_id': item['book'].id,
+                'quantity': item['quantity'],
+                'subtotal': f"{item['subtotal']:.2f}",
+            }
+            for item in cart_items
+        ],
+        'item_count': sum(item['quantity'] for item in cart_items),
+        'line_count': len(cart_items),
+        'total': f"{total:.2f}",
+    }
 
 
 def _make_tracking_number(order_id):
@@ -268,6 +286,8 @@ def update_cart(request):
                 cart.pop(key, None)
 
         request.session['cart'] = cart
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse(_cart_json_payload(cart))
         messages.success(request, 'Cart updated.')
     return redirect('cart')
 

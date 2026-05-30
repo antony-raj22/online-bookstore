@@ -6,6 +6,20 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 BASE_DIR = BACKEND_DIR.parent
 FRONTEND_DIR = BASE_DIR / 'frontend'
 
+
+def load_env_file(path):
+    if not path.exists():
+        return
+    for line in path.read_text(encoding='utf-8').splitlines():
+        line = line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+        key, value = line.split('=', 1)
+        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
+load_env_file(BASE_DIR / '.env')
+
 SECRET_KEY = os.getenv(
     'SECRET_KEY',
     'django-insecure-72b8^j02h&*gv8x(0r@k!@vw5#$h5&*z=2&@5!#r9z%=^%1@x*',
@@ -53,6 +67,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'store.context_processors.cart_count',
+                'store.context_processors.social_auth_status',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
             ],
