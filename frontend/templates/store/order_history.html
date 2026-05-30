@@ -30,6 +30,11 @@
         <span class="order-item-price">@ ₹{{ item.price }}</span>
       </div>
       {% endfor %}
+      {% if order.status == 'cancelled' and order.cancellation_reason %}
+      <div class="cancel-reason-note">
+        <strong>Cancellation reason:</strong> {{ order.cancellation_reason }}
+      </div>
+      {% endif %}
     </div>
     <div class="order-card-footer">
       <a href="{% url 'bill' order.id %}" class="btn-secondary"><i class="fa-solid fa-file-invoice"></i> Bill</a>
@@ -38,6 +43,20 @@
       </a>
       {% if not order.paid and order.payment_method != 'cod' %}
       <a href="{% url 'payment' order.id %}" class="btn-success"><i class="fa-solid fa-credit-card"></i> Pay Now</a>
+      {% endif %}
+      {% if order.can_be_cancelled %}
+      <details class="cancel-order-panel">
+        <summary class="btn-remove"><i class="fa-solid fa-ban"></i> Cancel Order</summary>
+        <form method="POST" action="{% url 'cancel_order' order.id %}" class="cancel-order-form">
+          {% csrf_token %}
+          <label for="cancel_reason_{{ order.id }}">Cancellation reason</label>
+          <textarea id="cancel_reason_{{ order.id }}" name="reason" rows="3" maxlength="500" required
+                    placeholder="Tell us why you want to cancel this order"></textarea>
+          <button type="submit" class="btn-dark">
+            <i class="fa-solid fa-circle-xmark"></i> Submit Cancellation
+          </button>
+        </form>
+      </details>
       {% endif %}
     </div>
   </div>

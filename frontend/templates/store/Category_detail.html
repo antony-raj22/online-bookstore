@@ -7,12 +7,12 @@
   <div class="container">
     <div class="genre-subnav-inner">
       <a href="{% url 'category_list' %}" class="genre-pill">
-        <span>📚</span> All Categories
+        All Categories
       </a>
       {% for slug, meta in all_categories.items %}
         <a href="{% url 'category_detail' slug=slug %}" 
            class="genre-pill {% if active_slug == slug %}active{% endif %}">
-          <span>{{ meta.icon }}</span> {{ meta.name }}
+          {{ meta.name }}
         </a>
       {% endfor %}
     </div>
@@ -26,7 +26,6 @@
     <a href="{% url 'category_list' %}" class="cat-back-link">
       <i class="fa-solid fa-arrow-left"></i> All Categories
     </a>
-    <div class="cat-detail-icon">{{ category_icon }}</div>
     <h1>{{ category_name }}</h1>
     <p>{{ category_desc }}</p>
     <span class="cat-total-badge">{{ books|length }} book{{ books|length|pluralize }}</span>

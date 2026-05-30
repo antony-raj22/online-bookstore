@@ -73,9 +73,15 @@ class Order(models.Model):
     razorpay_order_id = models.CharField(max_length=80, blank=True)
     razorpay_payment_id = models.CharField(max_length=80, blank=True)
     razorpay_signature = models.CharField(max_length=160, blank=True)
+    cancellation_reason = models.TextField(blank=True)
+    cancelled_at = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f"Order {self.id} by {self.user.username}"
+
+    @property
+    def can_be_cancelled(self):
+        return self.status in {'pending', 'processing'}
 
 
 class OrderItem(models.Model):

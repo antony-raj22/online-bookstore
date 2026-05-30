@@ -101,6 +101,16 @@ class AdminOrderStatusForm(forms.ModelForm):
         fields = ['status', 'payment_status']
 
 
+class CancelOrderForm(forms.Form):
+    reason = forms.CharField(
+        max_length=500,
+        widget=forms.Textarea(attrs={
+            'placeholder': 'Tell us why you want to cancel this order',
+            'rows': 3,
+        }),
+    )
+
+
 class SubscribeForm(forms.Form):
     name  = forms.CharField(max_length=200, required=False,
                              widget=forms.TextInput(attrs={'placeholder': 'e.g. Priya Sharma'}))

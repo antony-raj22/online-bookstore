@@ -2493,6 +2493,51 @@ body.modal-open {
   border-top: 1px solid var(--border);
 }
 
+.cancel-order-panel {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.cancel-order-panel summary {
+  width: fit-content;
+  list-style: none;
+}
+
+.cancel-order-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.cancel-order-form {
+  margin-top: 0.85rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+}
+
+.cancel-order-form label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.cancel-order-form textarea {
+  margin-bottom: 0.75rem;
+}
+
+.cancel-reason-note {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  background: #fdecea;
+  color: #8a1f1f;
+  font-size: 0.88rem;
+}
+
 .status-pill {
   display: inline-flex;
   align-items: center;

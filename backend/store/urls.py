@@ -19,6 +19,7 @@ urlpatterns = [
     path('bill/<int:order_id>/',        views.bill,              name='bill'),
     path('track-order/',               views.track_order,       name='track_order'),
     path('order-history/',             views.order_history,     name='order_history'),
+    path('order/<int:order_id>/cancel/', views.cancel_order,     name='cancel_order'),
     path('staff-dashboard/',           views.staff_dashboard,   name='staff_dashboard'),
 
     # Categories

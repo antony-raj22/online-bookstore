@@ -8,12 +8,12 @@
     <div class="genre-subnav-inner">
       <a href="?cat=all{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" 
          class="genre-pill {% if active_cat == 'all' %}active{% endif %}">
-        <span>📚</span> All
+        All
       </a>
       {% for slug, meta in all_categories.items %}
         <a href="?cat={{ slug }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" 
            class="genre-pill {% if active_cat == slug %}active{% endif %}">
-          <span>{{ meta.icon }}</span> {{ meta.name }}
+          {{ meta.name }}
         </a>
       {% endfor %}
     </div>
@@ -23,7 +23,6 @@
 
 {% block content %}
 <div class="cat-inline-hero">
-  <div class="cat-inline-icon">{{ category_icon }}</div>
   <div>
     <h1 class="cat-inline-title">{{ category_name }}</h1>
     <p class="cat-inline-desc">{{ category_desc }}</p>

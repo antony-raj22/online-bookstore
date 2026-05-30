@@ -13,25 +13,26 @@ from django.db import transaction
 from django.db.models import Count, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.crypto import get_random_string
 
-from .forms import AdminBookForm, AdminOrderStatusForm, CheckoutForm, PaymentForm, SubscribeForm, TrackingForm, UserRegisterForm
+from .forms import AdminBookForm, AdminOrderStatusForm, CancelOrderForm, CheckoutForm, PaymentForm, SubscribeForm, TrackingForm, UserRegisterForm
 from .models import Book, GENRE_CHOICES, Order, OrderItem, Subscriber
 
 
 CATEGORY_META = {
-    'fiction': {'name': 'Fiction', 'icon': 'Fic', 'desc': 'Novels, short stories, literary classics and modern masterpieces.'},
-    'nonfiction': {'name': 'Non-Fiction', 'icon': 'NF', 'desc': 'History, politics, science, journalism and current affairs.'},
-    'thriller': {'name': 'Mystery & Thriller', 'icon': 'Thr', 'desc': 'Page-turning whodunits, psychological suspense, and crime fiction.'},
-    'scifi': {'name': 'Science Fiction', 'icon': 'SF', 'desc': 'Space operas, dystopias, hard sci-fi and speculative futures.'},
-    'romance': {'name': 'Romance', 'icon': 'Rom', 'desc': 'Contemporary, historical, paranormal and literary romance.'},
-    'biography': {'name': 'Biography & Memoir', 'icon': 'Bio', 'desc': 'Life stories, autobiographies and inspiring personal journeys.'},
-    'children': {'name': "Children's Books", 'icon': 'Kids', 'desc': 'Picture books, early readers, middle-grade and young adult.'},
-    'academic': {'name': 'Academic', 'icon': 'Aca', 'desc': 'University textbooks, research, reference and study guides.'},
-    'selfhelp': {'name': 'Self-Help', 'icon': 'Self', 'desc': 'Productivity, mindfulness, finance and personal development.'},
-    'art': {'name': 'Art & Photography', 'icon': 'Art', 'desc': 'Coffee-table books, design, illustration and visual culture.'},
-    'cooking': {'name': 'Cooking & Food', 'icon': 'Cook', 'desc': 'Recipes, culinary memoirs, nutrition and food culture.'},
-    'travel': {'name': 'Travel', 'icon': 'Trip', 'desc': 'Travel writing, guides, exploration and outdoor adventure.'},
+    'fiction': {'name': 'Fiction', 'desc': 'Novels, short stories, literary classics and modern masterpieces.'},
+    'nonfiction': {'name': 'Non-Fiction', 'desc': 'History, politics, science, journalism and current affairs.'},
+    'thriller': {'name': 'Mystery & Thriller', 'desc': 'Page-turning whodunits, psychological suspense, and crime fiction.'},
+    'scifi': {'name': 'Science Fiction', 'desc': 'Space operas, dystopias, hard sci-fi and speculative futures.'},
+    'romance': {'name': 'Romance', 'desc': 'Contemporary, historical, paranormal and literary romance.'},
+    'biography': {'name': 'Biography & Memoir', 'desc': 'Life stories, autobiographies and inspiring personal journeys.'},
+    'children': {'name': "Children's Books", 'desc': 'Picture books, early readers, middle-grade and young adult.'},
+    'academic': {'name': 'Academic', 'desc': 'University textbooks, research, reference and study guides.'},
+    'selfhelp': {'name': 'Self-Help', 'desc': 'Productivity, mindfulness, finance and personal development.'},
+    'art': {'name': 'Art & Photography', 'desc': 'Coffee-table books, design, illustration and visual culture.'},
+    'cooking': {'name': 'Cooking & Food', 'desc': 'Recipes, culinary memoirs, nutrition and food culture.'},
+    'travel': {'name': 'Travel', 'desc': 'Travel writing, guides, exploration and outdoor adventure.'},
 }
 
 
@@ -160,7 +161,7 @@ def category_list(request):
     }
     books = books.order_by(sort_map.get(sort, '-id'))
 
-    meta = CATEGORY_META.get(slug, {'name': 'All Books', 'icon': 'All', 'desc': 'Browse our complete collection.'})
+    meta = CATEGORY_META.get(slug, {'name': 'All Books', 'desc': 'Browse our complete collection.'})
     return render(
         request,
         'store/Category.html',
@@ -168,7 +169,6 @@ def category_list(request):
             'books': books,
             'active_cat': slug,
             'category_name': meta['name'],
-            'category_icon': meta['icon'],
             'category_desc': meta['desc'],
             'all_categories': CATEGORY_META,
         },
@@ -176,7 +176,7 @@ def category_list(request):
 
 
 def category_detail(request, slug):
-    meta = CATEGORY_META.get(slug, {'name': slug.title(), 'icon': 'Book', 'desc': ''})
+    meta = CATEGORY_META.get(slug, {'name': slug.title(), 'desc': ''})
     sort = request.GET.get('sort', 'popular')
     books = Book.objects.filter(genre=slug)
 
@@ -195,7 +195,6 @@ def category_detail(request, slug):
         {
             'books': books,
             'category_name': meta['name'],
-            'category_icon': meta['icon'],
             'category_desc': meta['desc'],
             'active_slug': slug,
             'all_categories': CATEGORY_META,
@@ -374,10 +373,51 @@ def order_history(request):
 
 
 @login_required
+def cancel_order(request, order_id):
+    order = get_object_or_404(Order.objects.prefetch_related('items__book'), id=order_id, user=request.user)
+    if request.method != 'POST':
+        return redirect('order_history')
+
+    form = CancelOrderForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, 'Please enter a reason before cancelling the order.')
+        return redirect('order_history')
+
+    if not order.can_be_cancelled:
+        messages.error(request, 'This order can no longer be cancelled.')
+        return redirect('order_history')
+
+    with transaction.atomic():
+        locked_order = (
+            Order.objects.select_for_update()
+            .prefetch_related('items__book')
+            .get(id=order.id, user=request.user)
+        )
+        if not locked_order.can_be_cancelled:
+            messages.error(request, 'This order can no longer be cancelled.')
+            return redirect('order_history')
+
+        for item in locked_order.items.select_related('book'):
+            item.book.stock += item.quantity
+            item.book.save(update_fields=['stock'])
+
+        locked_order.status = 'cancelled'
+        locked_order.cancellation_reason = form.cleaned_data['reason'].strip()
+        locked_order.cancelled_at = timezone.now()
+        locked_order.save(update_fields=['status', 'cancellation_reason', 'cancelled_at'])
+
+    messages.success(request, f'Order #{order.id} has been cancelled.')
+    return redirect('order_history')
+
+
+@login_required
 def payment(request, order_id):
     order = get_object_or_404(Order.objects.prefetch_related('items__book'), id=order_id)
     if not _user_can_view_order(request.user, order):
         messages.error(request, 'You cannot access that payment page.')
+        return redirect('order_history')
+    if order.status == 'cancelled':
+        messages.error(request, 'This order has been cancelled and cannot be paid.')
         return redirect('order_history')
     if order.paid or order.payment_method == 'cod':
         return redirect('bill', order_id=order.id)
