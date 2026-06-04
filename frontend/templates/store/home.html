@@ -11,7 +11,10 @@
     <p>Thousands of books, from bestsellers to hidden gems — all at your fingertips.</p>
     <div class="hero-actions">
       <a href="#featured" class="btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Browse Books</a>
-      <a href="{% url 'subscribe' %}" class="btn-secondary"><i class="fa-solid fa-envelope"></i> Get 10% Off</a>
+      <a href="{% url 'subscribe' %}" class="btn-secondary">
+        <i class="fa-solid {% if is_subscribed_user %}fa-circle-check{% else %}fa-envelope{% endif %}"></i>
+        {% if is_subscribed_user %}You Are Subscribed{% else %}Subscribed Users Get 10% Off{% endif %}
+      </a>
     </div>
     <br>
     <div class="hero-trust">
@@ -109,7 +112,7 @@
           <i class="fa-solid fa-cart-plus"></i> Add Cart
         </a>
         <a href="{% url 'buy_now' book.id %}" class="btn-small btn-buy-now">
-          <i class="fa-solid fa-bolt"></i> Buy Now
+          <i class="fa-solid fa-bolt"></i> Buy
         </a>
         {% else %}
         <span class="btn-small disabled">Sold Out</span>
@@ -154,10 +157,17 @@
   <div class="newsletter-inner">
     <div class="newsletter-text">
       <h2><i class="fa-solid fa-envelope-open-text"></i> Never Miss a Story</h2>
-      <p>Join our newsletter and get <strong>10% off</strong> your first order + weekly book picks.</p>
+      <p>
+        {% if is_subscribed_user %}
+          You are subscribed. Your <strong>10% off</strong> applies automatically at checkout.
+        {% else %}
+          Become a subscribed user and get <strong>10% off</strong> eligible book orders + weekly book picks.
+        {% endif %}
+      </p>
     </div>
     <a href="{% url 'subscribe' %}" class="btn-primary" style="flex-shrink:0; white-space:nowrap;">
-      <i class="fa-solid fa-paper-plane"></i> Subscribe Free
+      <i class="fa-solid {% if is_subscribed_user %}fa-circle-check{% else %}fa-paper-plane{% endif %}"></i>
+      {% if is_subscribed_user %}Subscribed{% else %}Subscribe{% endif %}
     </a>
   </div>
 </div>

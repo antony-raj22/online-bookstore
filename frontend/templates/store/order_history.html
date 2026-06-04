@@ -35,12 +35,19 @@
         <strong>Cancellation reason:</strong> {{ order.cancellation_reason }}
       </div>
       {% endif %}
+      {% if order.payment_method == 'razorpay' and not order.paid and order.status != 'cancelled' %}
+      <div class="cancel-reason-note">
+        <strong>Not confirmed:</strong> Complete Razorpay payment to confirm this order.
+      </div>
+      {% endif %}
     </div>
     <div class="order-card-footer">
+      {% if order.paid or order.payment_method == 'cod' %}
       <a href="{% url 'bill' order.id %}" class="btn-secondary"><i class="fa-solid fa-file-invoice"></i> Bill</a>
       <a href="{% url 'track_order' %}?order_id={{ order.id }}&postal_code={{ order.postal_code }}" class="btn-primary">
         <i class="fa-solid fa-location-dot"></i> Track
       </a>
+      {% endif %}
       {% if not order.paid and order.payment_method != 'cod' %}
       <a href="{% url 'payment' order.id %}" class="btn-success"><i class="fa-solid fa-credit-card"></i> Pay Now</a>
       {% endif %}

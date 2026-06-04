@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import RegexValidator
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
 
 GENRE_CHOICES = [
@@ -16,6 +19,31 @@ GENRE_CHOICES = [
     ('cooking',   'Cooking & Food'),
     ('travel',    'Travel'),
 ]
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
+    mobile_number = models.CharField(
+        max_length=20,
+        blank=True,
+        validators=[
+            RegexValidator(
+                regex=r'^\+?[0-9\s-]{7,20}$',
+                message='Enter a valid mobile number.',
+            )
+        ],
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username} profile"
+
+
+@receiver(post_save, sender=User)
+def ensure_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
 
 class Book(models.Model):
     title       = models.CharField(max_length=200)
@@ -64,7 +92,10 @@ class Order(models.Model):
     postal_code  = models.CharField(max_length=20)
     created_at   = models.DateTimeField(default=timezone.now)
     paid         = models.BooleanField(default=False)
+    subtotal_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    stock_reserved = models.BooleanField(default=True)
     status       = models.CharField(max_length=20, choices=STATUS_CHOICES,
                                     default='pending')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='razorpay')
@@ -99,12 +130,58 @@ class OrderItem(models.Model):
 
 
 class Subscriber(models.Model):
+    PLAN_CHOICES = [
+        ('monthly', '1 Month'),
+        ('quarterly', '3 Months'),
+        ('yearly', 'Yearly'),
+    ]
+    PLAN_PRICES = {
+        'monthly': 100,
+        'quarterly': 250,
+        'yearly': 900,
+    }
+    PLAN_DURATIONS = {
+        'monthly': 30,
+        'quarterly': 90,
+        'yearly': 365,
+    }
+    PAYMENT_STATUS_CHOICES = [
+        ('awaiting_payment', 'Awaiting Payment'),
+        ('paid', 'Paid'),
+        ('failed', 'Failed'),
+    ]
+
     name           = models.CharField(max_length=200, blank=True)
     email          = models.EmailField(unique=True)
+    mobile_number  = models.CharField(
+        max_length=20,
+        blank=True,
+        validators=[
+            RegexValidator(
+                regex=r'^\+?[0-9\s-]{7,20}$',
+                message='Enter a valid mobile number.',
+            )
+        ],
+    )
     genres         = models.CharField(max_length=500, blank=True,
                                       help_text='Comma-separated genre interests')
+    plan           = models.CharField(max_length=20, choices=PLAN_CHOICES, default='monthly')
+    plan_price     = models.PositiveIntegerField(default=100)
+    payment_status = models.CharField(max_length=30, choices=PAYMENT_STATUS_CHOICES, default='awaiting_payment')
+    razorpay_order_id = models.CharField(max_length=80, blank=True)
+    razorpay_payment_id = models.CharField(max_length=80, blank=True)
+    razorpay_signature = models.CharField(max_length=160, blank=True)
     subscribed_at  = models.DateTimeField(auto_now_add=True)
-    is_active      = models.BooleanField(default=True)
+    expires_at     = models.DateTimeField(blank=True, null=True)
+    is_active      = models.BooleanField(default=False)
 
     def __str__(self):
         return self.email
+
+    @classmethod
+    def price_for_plan(cls, plan):
+        return cls.PLAN_PRICES.get(plan, cls.PLAN_PRICES['monthly'])
+
+    @classmethod
+    def expiry_for_plan(cls, plan):
+        return timezone.now() + timezone.timedelta(days=cls.PLAN_DURATIONS.get(plan, 30))

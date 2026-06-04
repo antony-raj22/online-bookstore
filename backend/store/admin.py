@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Book, Order, OrderItem, Subscriber
+from .models import Book, Order, OrderItem, Subscriber, UserProfile
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
@@ -16,7 +16,7 @@ class BookAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'customer_name', 'order_date', 'status', 'payment_status', 'payment_method', 'total_amount', 'colored_status']
+    list_display = ['id', 'customer_name', 'order_date', 'status', 'payment_status', 'payment_method', 'stock_reserved', 'subtotal_amount', 'discount_amount', 'total_amount', 'colored_status']
     list_display_links = ['id', 'customer_name']
     list_editable = ['status']
     list_filter = ['status', 'created_at']
@@ -52,6 +52,21 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(Subscriber)
 class SubscriberAdmin(admin.ModelAdmin):
-    list_display = ['email', 'name', 'is_active', 'subscribed_at']
-    list_filter = ['is_active', 'subscribed_at']
-    search_fields = ['email', 'name', 'genres']
+    list_display = ['email', 'name', 'mobile_number', 'plan', 'plan_price', 'payment_status', 'is_active', 'expires_at', 'subscribed_at']
+    list_filter = ['plan', 'payment_status', 'is_active', 'subscribed_at']
+    search_fields = ['email', 'name', 'mobile_number', 'genres', 'razorpay_order_id', 'razorpay_payment_id']
+    verbose_name = 'Subscribed User'
+    verbose_name_plural = 'Subscribed Users'
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'display_name', 'email', 'mobile_number', 'updated_at']
+    search_fields = ['user__username', 'user__first_name', 'user__last_name', 'user__email', 'mobile_number']
+
+    def display_name(self, obj):
+        return obj.user.get_full_name() or obj.user.username
+    display_name.short_description = 'Name'
+
+    def email(self, obj):
+        return obj.user.email

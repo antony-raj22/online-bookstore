@@ -65,6 +65,16 @@
   </div>
 
   <div class="receipt-total">
+    <span>Subtotal</span>
+    <strong>Rs.{{ order.subtotal_amount }}</strong>
+  </div>
+  {% if order.discount_amount %}
+  <div class="receipt-total">
+    <span>Subscribed User Discount (10%)</span>
+    <strong>-Rs.{{ order.discount_amount }}</strong>
+  </div>
+  {% endif %}
+  <div class="receipt-total">
     <span>Total Paid</span>
     <strong>₹{{ order.total_amount }}</strong>
   </div>

@@ -15,7 +15,7 @@
         Personalised picks, exclusive deals, and your entire reading journey — all in one place.
       </p>
       <ul class="auth-perks">
-        <li><span class="auth-perk-icon"><i class="fa-solid fa-gift"></i></span> 10% off your first order</li>
+        <li><span class="auth-perk-icon"><i class="fa-solid fa-gift"></i></span> 10% off for subscribed users</li>
         <li><span class="auth-perk-icon"><i class="fa-solid fa-book"></i></span> Personalised recommendations</li>
         <li><span class="auth-perk-icon"><i class="fa-solid fa-box"></i></span> Order tracking &amp; history</li>
         <li><span class="auth-perk-icon"><i class="fa-solid fa-bell"></i></span> Early access to new arrivals</li>
@@ -123,6 +123,16 @@
                  value="{{ form.email.value|default:'' }}">
           {% if form.email.errors %}
             <ul class="field-errors">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_mobile_number">Mobile Number</label>
+          <input type="tel" id="id_mobile_number" name="mobile_number"
+                 placeholder="+91 98765 43210" required autocomplete="tel" inputmode="tel"
+                 value="{{ form.mobile_number.value|default:'' }}">
+          {% if form.mobile_number.errors %}
+            <ul class="field-errors">{% for e in form.mobile_number.errors %}<li>{{ e }}</li>{% endfor %}</ul>
           {% endif %}
         </div>
 

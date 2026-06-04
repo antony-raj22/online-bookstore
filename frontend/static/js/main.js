@@ -134,6 +134,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const footerPolicyPanel = document.getElementById('footer-policy-panel');
+  const footerPolicyLinks = document.querySelectorAll('[data-footer-policy-target]');
+  const footerPolicyItems = document.querySelectorAll('[data-footer-policy-content]');
+  footerPolicyLinks.forEach(link => {
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      const targetId = link.dataset.footerPolicyTarget;
+      if (!footerPolicyPanel || !targetId) return;
+
+      footerPolicyPanel.hidden = false;
+      footerPolicyLinks.forEach(item => item.classList.toggle('is-active', item === link));
+      footerPolicyItems.forEach(item => {
+        item.classList.toggle('is-active', item.id === targetId);
+      });
+      footerPolicyPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  });
+
   document.querySelectorAll('.category-card').forEach(card => {
     card.addEventListener('click', function () {
       this.style.transform = 'scale(0.97)';

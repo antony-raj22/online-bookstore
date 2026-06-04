@@ -1,7 +1,8 @@
 from django import forms
+from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Book, GENRE_CHOICES, Order
+from .models import Book, GENRE_CHOICES, Order, Subscriber, UserProfile
 
 
 class UserRegisterForm(UserCreationForm):
@@ -10,10 +11,24 @@ class UserRegisterForm(UserCreationForm):
     last_name  = forms.CharField(max_length=50, required=False,
                                   widget=forms.TextInput(attrs={'placeholder': 'Last name'}))
     email      = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'you@example.com'}))
+    mobile_number = forms.CharField(
+        max_length=20,
+        validators=[
+            RegexValidator(
+                regex=r'^\+?[0-9\s-]{7,20}$',
+                message='Enter a valid mobile number.',
+            )
+        ],
+        widget=forms.TextInput(attrs={
+            'placeholder': '+91 98765 43210',
+            'autocomplete': 'tel',
+            'inputmode': 'tel',
+        }),
+    )
 
     class Meta:
         model  = User
-        fields = ['first_name', 'last_name', 'username', 'email', 'password1', 'password2']
+        fields = ['first_name', 'last_name', 'username', 'email', 'mobile_number', 'password1', 'password2']
 
     def clean_email(self):
         email = self.cleaned_data['email'].strip().lower()
@@ -28,6 +43,10 @@ class UserRegisterForm(UserCreationForm):
         user.email      = self.cleaned_data['email']
         if commit:
             user.save()
+            UserProfile.objects.update_or_create(
+                user=user,
+                defaults={'mobile_number': self.cleaned_data['mobile_number'].strip()},
+            )
         return user
 
 
@@ -115,6 +134,29 @@ class SubscribeForm(forms.Form):
     name  = forms.CharField(max_length=200, required=False,
                              widget=forms.TextInput(attrs={'placeholder': 'e.g. Priya Sharma'}))
     email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'you@example.com'}))
+    mobile_number = forms.CharField(
+        max_length=20,
+        validators=[
+            RegexValidator(
+                regex=r'^\+?[0-9\s-]{7,20}$',
+                message='Enter a valid mobile number.',
+            )
+        ],
+        widget=forms.TextInput(attrs={
+            'placeholder': '+91 98765 43210',
+            'autocomplete': 'tel',
+            'inputmode': 'tel',
+        }),
+    )
+    plan = forms.ChoiceField(
+        choices=[
+            ('monthly', '1 Month - Rs.100'),
+            ('quarterly', '3 Months - Rs.250'),
+            ('yearly', 'Yearly - Rs.900'),
+        ],
+        widget=forms.RadioSelect,
+        initial='monthly',
+    )
     genre = forms.MultipleChoiceField(
         choices=GENRE_CHOICES,
         required=False,

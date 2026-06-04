@@ -112,6 +112,11 @@ main { flex: 1; }
 }
 .nav-link:hover { color: var(--red); }
 
+.nav-link.is-subscribed {
+  color: #276749;
+  font-weight: 800;
+}
+
 .cart-icon { position: relative; font-size: 1.35rem; }
 .cart-count {
   position: absolute;
@@ -1186,7 +1191,7 @@ textarea { resize: vertical; min-height: 100px; }
 
 .sub-input-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.2rem;
 }
 
@@ -1228,6 +1233,60 @@ textarea { resize: vertical; min-height: 100px; }
 /* Interests / Tags */
 .sub-interests {
   margin: 0.5rem 0;
+}
+
+.sub-plan-group {
+  margin: 0.25rem 0;
+}
+
+.sub-plan-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.sub-plan-card {
+  display: flex;
+  min-height: 126px;
+  flex-direction: column;
+  gap: 0.35rem;
+  justify-content: center;
+  border: 1.5px solid var(--border-2);
+  border-radius: 16px;
+  padding: 1rem;
+  cursor: pointer;
+  background: var(--surface);
+  transition: border-color var(--trans), box-shadow var(--trans), transform var(--trans);
+}
+
+.sub-plan-card input {
+  accent-color: var(--red);
+  width: 18px;
+  height: 18px;
+}
+
+.sub-plan-card:has(input:checked) {
+  border-color: var(--red);
+  box-shadow: 0 10px 22px rgba(196, 69, 44, 0.12);
+  transform: translateY(-1px);
+}
+
+.sub-plan-name {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sub-plan-card strong {
+  color: var(--text);
+  font-size: 1.35rem;
+}
+
+.sub-plan-card small {
+  color: var(--red);
+  font-weight: 800;
 }
 
 .sub-interests-label {
@@ -1311,6 +1370,18 @@ textarea { resize: vertical; min-height: 100px; }
   align-items: center;
   justify-content: center;
   gap: 6px;
+}
+
+.sub-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1.2rem 0 2rem;
+}
+
+.sub-action-row .btn-primary,
+.sub-action-row .btn-secondary {
+  flex: 1 1 190px;
 }
 
 /* Right Column (Perks) */
@@ -1451,6 +1522,9 @@ textarea { resize: vertical; min-height: 100px; }
   .sub-input-row {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+  .sub-plan-options {
+    grid-template-columns: 1fr;
   }
   .subscribe-hero {
     padding: 2rem 1rem 3rem;
@@ -1988,6 +2062,38 @@ textarea { resize: vertical; min-height: 100px; }
   color: var(--red);
 }
 
+.nav-account-card {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-account-card strong {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.nav-account-card span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
+.nav-account-card .nav-subscription-pill {
+  width: fit-content;
+  padding: 5px 9px;
+  border-radius: 40px;
+  background: #eef7f2;
+  color: #276749;
+  font-weight: 800;
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
@@ -2202,6 +2308,47 @@ textarea { resize: vertical; min-height: 100px; }
   gap: 1rem;
 }
 
+.footer-bottom-links a {
+  color: var(--mid);
+  font-weight: 600;
+}
+
+.footer-bottom-links a:hover,
+.footer-bottom-links a.is-active {
+  color: var(--red);
+}
+
+.footer-policy-panel {
+  margin-top: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 1rem;
+}
+
+.footer-policy-item {
+  display: none;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.footer-policy-item.is-active {
+  display: grid;
+}
+
+.footer-policy-item strong {
+  color: var(--mid);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.footer-policy-item a {
+  color: var(--red);
+  font-weight: 700;
+}
+
 .newsletter-msg-success {
   color: #d4edda;
 }
@@ -2318,6 +2465,23 @@ body.modal-open {
   .book-detail {
     gap: 2rem;
   }
+
+  .auth-split {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .auth-left {
+    padding: 2rem;
+  }
+
+  .auth-left-inner {
+    max-width: 680px;
+  }
+
+  .auth-right {
+    padding: 2rem 0 3rem;
+  }
 }
 
 @media (max-width: 640px) {
@@ -2364,6 +2528,52 @@ body.modal-open {
 
   .footer-bottom {
     flex-direction: column;
+  }
+
+  .auth-left {
+    padding: 1.5rem;
+  }
+
+  .auth-brand {
+    margin-bottom: 1rem;
+    font-size: 1.45rem;
+  }
+
+  .auth-left-title {
+    font-size: 1.55rem;
+  }
+
+  .auth-left-sub,
+  .auth-perks,
+  .auth-quote {
+    display: none;
+  }
+
+  .auth-right {
+    padding: 1rem 0 2rem;
+  }
+
+  .auth-form-card {
+    border-radius: 16px;
+    padding: 1.25rem;
+  }
+
+  .auth-form-title {
+    font-size: 1.45rem;
+  }
+
+  .register-name-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .social-btn,
+  .auth-submit-btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-success,
+  .btn-dark {
+    width: 100%;
   }
 }
 
@@ -2735,6 +2945,36 @@ body.modal-open {
   margin-bottom: 2rem;
 }
 
+.admin-book-search {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(180px, 260px) auto auto;
+  gap: 0.8rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
+.admin-search-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.admin-search-field label {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.admin-search-field input,
+.admin-search-field select {
+  min-height: 42px;
+  border: 1px solid var(--border-2);
+  border-radius: 12px;
+  padding: 9px 12px;
+}
+
 .admin-book-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2792,6 +3032,11 @@ body.modal-open {
 
 .inline-form {
   display: inline;
+}
+
+.admin-empty-cell {
+  color: var(--muted);
+  text-align: center !important;
 }
 
 .admin-row {
@@ -2879,9 +3124,14 @@ body.modal-open {
   .receipt-actions,
   .receipt-top,
   .order-card-header,
+  .admin-book-search,
   .admin-row {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .admin-book-search {
+    display: flex;
   }
 
   .receipt-meta {

@@ -31,9 +31,28 @@
       <span class="order-item-price">₹{{ item.subtotal }}</span>
     </div>
     {% endfor %}
+    <div class="summary-row">
+      <span>Subtotal</span><span>Rs.{{ subtotal }}</span>
+    </div>
+    {% if discount_amount %}
+    <div class="summary-row">
+      <span>Subscribed user discount (10%)</span><span>-Rs.{{ discount_amount }}</span>
+    </div>
+    {% else %}
+    <div class="checkout-note">
+      <i class="fa-solid fa-tags"></i>
+      10% discount applies only to active subscribed users signed in with their subscribed email.
+    </div>
+    {% endif %}
     <div class="summary-row total">
       <span>Total</span><span>₹{{ total }}</span>
     </div>
+    {% if active_subscriber %}
+    <div class="checkout-note">
+      <i class="fa-solid fa-circle-check"></i>
+      Subscribed user discount applied for {{ active_subscriber.email }}.
+    </div>
+    {% endif %}
     <div class="checkout-note">
       <i class="fa-solid fa-shield-halved"></i>
       Your order is reserved during payment and confirmed after billing.

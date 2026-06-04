@@ -14,13 +14,13 @@
   <div class="stat-card"><span>Total Orders</span><strong>{{ total_orders }}</strong></div>
   <div class="stat-card"><span>Revenue</span><strong>₹{{ total_revenue }}</strong></div>
   <div class="stat-card"><span>Books</span><strong>{{ book_count }}</strong></div>
-  <div class="stat-card"><span>Subscribers</span><strong>{{ subscriber_count }}</strong></div>
+  <div class="stat-card"><span>Subscribed Users</span><strong>{{ subscriber_count }}</strong></div>
 </div>
 
 <div class="admin-tabs">
   <a href="#books" class="filter-pill active"><i class="fa-solid fa-book"></i> Books</a>
   <a href="#orders" class="filter-pill"><i class="fa-solid fa-box"></i> Orders</a>
-  <a href="#subscribers" class="filter-pill"><i class="fa-solid fa-envelope"></i> Subscribers</a>
+  <a href="#subscribers" class="filter-pill"><i class="fa-solid fa-envelope"></i> Subscribed Users</a>
   <a href="#stock" class="filter-pill"><i class="fa-solid fa-triangle-exclamation"></i> Low Stock</a>
 </div>
 
@@ -39,8 +39,28 @@
 <section class="admin-panel admin-wide">
   <div class="admin-section-head">
     <h2>Manage Books</h2>
-    <span>{{ book_count }} total</span>
+    <span>{{ book_result_count }} found / {{ book_count }} total</span>
   </div>
+  <form method="GET" action="{% url 'staff_dashboard' %}#books" class="admin-book-search">
+    <div class="admin-search-field">
+      <label for="book_q">Find book</label>
+      <input id="book_q" type="search" name="book_q" value="{{ book_search_query }}"
+             placeholder="Search title or author">
+    </div>
+    <div class="admin-search-field">
+      <label for="book_genre">Category</label>
+      <select id="book_genre" name="book_genre">
+        <option value="">All categories</option>
+        {% for value,label in book_form.fields.genre.choices %}
+        <option value="{{ value }}" {% if book_search_genre == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Find</button>
+    {% if book_search_query or book_search_genre %}
+    <a href="{% url 'staff_dashboard' %}#books" class="btn-small">Clear</a>
+    {% endif %}
+  </form>
   <div class="admin-table-scroll">
     <table class="admin-table">
       <thead>
@@ -83,6 +103,10 @@
                 <button type="submit" class="btn-remove"><i class="fa-solid fa-trash"></i> Delete</button>
               </form>
             </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="admin-empty-cell">No books matched your search.</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -144,7 +168,7 @@
 
 <section class="admin-panel admin-wide" id="subscribers">
   <div class="admin-section-head">
-    <h2>Subscribers</h2>
+    <h2>Subscribed Users</h2>
     <span>{{ subscriber_count }} active</span>
   </div>
   {% for subscriber in subscribers %}
@@ -161,7 +185,7 @@
     </button>
   </form>
   {% empty %}
-  <p class="muted-copy">No subscribers yet.</p>
+  <p class="muted-copy">No subscribed users yet.</p>
   {% endfor %}
 </section>
 {% endblock %}
