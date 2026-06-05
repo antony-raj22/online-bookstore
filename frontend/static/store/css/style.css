@@ -6723,3 +6723,321 @@ canvas {
     width: 100%;
   }
 }
+
+/* Auth social button color refresh */
+.auth-form-sub a,
+.auth-switch a,
+.auth-forgot a {
+  color: var(--green);
+}
+
+.social-btn {
+  min-height: 48px;
+  border-radius: 8px;
+  border-width: 1px;
+  font-weight: 800;
+}
+
+.social-google {
+  background: #fff;
+  border-color: #d8e6fb;
+  color: #24496f;
+}
+
+.social-facebook {
+  background: #1877f2;
+  border-color: #1877f2;
+  color: #fff;
+}
+
+.social-github {
+  background: #181717;
+  border-color: #181717;
+  color: #fff;
+}
+
+.social-google:hover {
+  background: #edf4ff;
+  border-color: #4285f4;
+  color: #174ea6;
+}
+
+.social-facebook:hover {
+  background: #0f67dc;
+  border-color: #0f67dc;
+  color: #fff;
+}
+
+.social-github:hover {
+  background: #2d333b;
+  border-color: #2d333b;
+  color: #fff;
+}
+
+.social-disabled,
+.social-disabled:hover {
+  opacity: 0.72;
+}
+
+.social-disabled.social-google {
+  background: #f3f7fc;
+  color: #62758d;
+}
+
+.social-disabled.social-facebook {
+  background: #cfe1fb;
+  border-color: #cfe1fb;
+  color: #315f99;
+}
+
+.social-disabled.social-github {
+  background: #e8eaed;
+  border-color: #d8dce1;
+  color: #4b5563;
+}
+
+:root[data-theme="dark"] .auth-right {
+  background: var(--bg);
+}
+
+:root[data-theme="dark"] .auth-form-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .auth-form-sub,
+:root[data-theme="dark"] .auth-switch,
+:root[data-theme="dark"] .auth-divider-text {
+  color: var(--muted);
+}
+
+:root[data-theme="dark"] .social-google {
+  background: #f8fbff;
+  border-color: #b8d4fb;
+  color: #174ea6;
+}
+
+:root[data-theme="dark"] .social-facebook {
+  background: #2f80ed;
+  border-color: #2f80ed;
+  color: #fff;
+}
+
+:root[data-theme="dark"] .social-github {
+  background: #f5f7fa;
+  border-color: #dce3ec;
+  color: #14171a;
+}
+
+:root[data-theme="dark"] .social-disabled.social-google,
+:root[data-theme="dark"] .social-disabled.social-facebook,
+:root[data-theme="dark"] .social-disabled.social-github {
+  background: var(--surface-soft);
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+/* Keep social login labels visible even when providers are disabled */
+.social-login-group .social-disabled,
+.social-login-group .social-disabled:hover {
+  opacity: 1;
+  filter: none;
+}
+
+.social-login-group .social-disabled.social-google {
+  background: #ffffff;
+  border-color: #4285f4;
+  color: #174ea6;
+}
+
+.social-login-group .social-disabled.social-facebook {
+  background: #1877f2;
+  border-color: #1877f2;
+  color: #ffffff;
+}
+
+.social-login-group .social-disabled.social-github {
+  background: #181717;
+  border-color: #181717;
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .social-login-group .social-disabled.social-google {
+  background: #ffffff;
+  border-color: #8ab4f8;
+  color: #174ea6;
+}
+
+:root[data-theme="dark"] .social-login-group .social-disabled.social-facebook {
+  background: #2f80ed;
+  border-color: #2f80ed;
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .social-login-group .social-disabled.social-github {
+  background: #f5f7fa;
+  border-color: #f5f7fa;
+  color: #111827;
+}
+
+/* Keep single-color social logos visible on colored buttons */
+.social-facebook .social-icon path,
+.social-github .social-icon path {
+  fill: currentColor;
+}
+
+/* Register page polish */
+.auth-register-card {
+  max-width: 560px;
+}
+
+.auth-register-card .auth-form-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.auth-register-card .auth-form-title::before {
+  content: "\f234";
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  background: #edf7f2;
+  color: var(--green);
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  font-size: 1rem;
+}
+
+.auth-register-form {
+  display: grid;
+  gap: 0.95rem;
+}
+
+.auth-register-form .form-group,
+.auth-register-form .register-name-row {
+  margin-bottom: 0;
+}
+
+.auth-register-form label:not(.terms-check) {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.auth-register-form input {
+  min-height: 46px;
+  border-radius: 8px;
+  border: 1px solid var(--border-2);
+  background: #fff;
+  color: var(--text);
+}
+
+.auth-register-form input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(47, 124, 95, 0.12);
+}
+
+.auth-register-form .pw-toggle {
+  background: #edf7f2;
+  color: var(--green);
+}
+
+.auth-register-form .pw-toggle:hover {
+  background: var(--green);
+  color: #fff;
+}
+
+.pw-strength {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: -0.2rem;
+}
+
+.pw-strength-bar {
+  height: 8px;
+  flex: 1;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.pw-strength-bar span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  transition: width var(--trans), background var(--trans);
+}
+
+.pw-label {
+  min-width: 56px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.terms-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #f8fbf7;
+  color: var(--mid);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.terms-check input {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin-top: 0.15rem;
+  accent-color: var(--green);
+  flex: 0 0 auto;
+}
+
+.terms-check a {
+  color: var(--green);
+  font-weight: 800;
+}
+
+:root[data-theme="dark"] .auth-register-card .auth-form-title::before,
+:root[data-theme="dark"] .auth-register-form .pw-toggle {
+  background: #12352f;
+  color: var(--green);
+}
+
+:root[data-theme="dark"] .auth-register-form input {
+  background: #0f1c16;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .terms-check {
+  background: var(--surface-soft);
+  border-color: var(--border);
+  color: var(--mid);
+}
+
+:root[data-theme="dark"] .pw-strength-bar {
+  background: var(--surface-soft);
+}
+
+@media (max-width: 640px) {
+  .auth-register-card {
+    max-width: 100%;
+  }
+
+  .auth-register-card .auth-form-title {
+    align-items: flex-start;
+  }
+}

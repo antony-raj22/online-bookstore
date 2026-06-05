@@ -29,7 +29,7 @@
 
   <!-- RIGHT FORM PANEL -->
   <div class="auth-right">
-    <div class="auth-form-card">
+    <div class="auth-form-card auth-register-card">
 
       <h1 class="auth-form-title">Create your account</h1>
       <p class="auth-form-sub">Already have one? <a href="{% url 'login' %}">Sign in →</a></p>
@@ -78,7 +78,7 @@
       </div>
 
       <!-- REGISTER FORM -->
-      <form method="POST" class="register-form" novalidate>
+      <form method="POST" class="register-form auth-register-form" novalidate>
         {% csrf_token %}
 
         {% if form.non_field_errors %}
