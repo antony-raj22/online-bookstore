@@ -7,14 +7,14 @@
     <span class="eyebrow">Staff dashboard</span>
     <h1>Admin Page</h1>
   </div>
-  <a href="/admin/" class="btn-dark"><i class="fa-solid fa-screwdriver-wrench"></i> Django Admin</a>
+  <a href="/admin/" class="btn-dark django-admin-btn"><i class="fa-solid fa-screwdriver-wrench"></i> Django Admin</a>
 </div>
 
 <div class="dashboard-stats">
-  <div class="stat-card"><span>Total Orders</span><strong>{{ total_orders }}</strong></div>
-  <div class="stat-card"><span>Revenue</span><strong>₹{{ total_revenue }}</strong></div>
-  <div class="stat-card"><span>Books</span><strong>{{ book_count }}</strong></div>
-  <div class="stat-card"><span>Subscribed Users</span><strong>{{ subscriber_count }}</strong></div>
+  <a href="#orders" class="stat-card"><span>Total Orders</span><strong>{{ total_orders }}</strong></a>
+  <a href="#orders" class="stat-card"><span>Revenue</span><strong>&#8377;{{ total_revenue|floatformat:2 }}</strong></a>
+  <a href="#books" class="stat-card"><span>Books</span><strong>{{ book_count }}</strong></a>
+  <a href="#subscribers" class="stat-card"><span>Subscribed Users</span><strong>{{ subscriber_count }}</strong></a>
 </div>
 
 <div class="admin-tabs">
@@ -24,7 +24,38 @@
   <a href="#stock" class="filter-pill"><i class="fa-solid fa-triangle-exclamation"></i> Low Stock</a>
 </div>
 
-<section class="admin-panel admin-wide" id="books">
+<section class="admin-focus">
+  <div class="admin-focus-copy">
+    <span class="eyebrow"><i class="fa-solid fa-chart-simple"></i> Admin focus</span>
+    <h2>Today&apos;s Dashboard</h2>
+    <p>Jump into books, order updates, subscribers, and stock checks from one clean control surface.</p>
+  </div>
+  <div class="admin-focus-grid">
+    <a href="#books" class="admin-focus-item">
+      <i class="fa-solid fa-book-open-reader"></i>
+      <strong>{{ book_result_count }}</strong>
+      <span>visible books</span>
+    </a>
+    <a href="#orders" class="admin-focus-item">
+      <i class="fa-solid fa-truck-fast"></i>
+      <strong>{{ recent_orders|length }}</strong>
+      <span>recent orders</span>
+    </a>
+    <a href="#subscribers" class="admin-focus-item">
+      <i class="fa-solid fa-user-check"></i>
+      <strong>{{ subscriber_count }}</strong>
+      <span>active users</span>
+    </a>
+    <a href="#stock" class="admin-focus-item is-warning">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <strong>{{ low_stock_count }}</strong>
+      <span>low stock</span>
+    </a>
+  </div>
+</section>
+
+<div class="admin-tab-panels">
+<section class="admin-panel admin-wide" id="books" data-admin-tab-panel="books">
   <div class="admin-section-head">
     <h2>Add New Book</h2>
   </div>
@@ -36,7 +67,7 @@
   </form>
 </section>
 
-<section class="admin-panel admin-wide">
+<section class="admin-panel admin-wide" data-admin-tab-panel="books">
   <div class="admin-section-head">
     <h2>Manage Books</h2>
     <span>{{ book_result_count }} found / {{ book_count }} total</span>
@@ -115,7 +146,7 @@
 </section>
 
 <div class="admin-grid">
-  <section class="admin-panel" id="orders">
+  <section class="admin-panel" id="orders" data-admin-tab-panel="orders">
     <div class="admin-section-head">
       <h2>Recent Orders</h2>
     </div>
@@ -148,7 +179,7 @@
     {% endfor %}
   </section>
 
-  <section class="admin-panel" id="stock">
+  <section class="admin-panel" id="stock" data-admin-tab-panel="stock">
     <div class="admin-section-head">
       <h2>Low Stock</h2>
     </div>
@@ -166,7 +197,7 @@
   </section>
 </div>
 
-<section class="admin-panel admin-wide" id="subscribers">
+<section class="admin-panel admin-wide" id="subscribers" data-admin-tab-panel="subscribers">
   <div class="admin-section-head">
     <h2>Subscribed Users</h2>
     <span>{{ subscriber_count }} active</span>
@@ -188,4 +219,5 @@
   <p class="muted-copy">No subscribed users yet.</p>
   {% endfor %}
 </section>
+</div>
 {% endblock %}

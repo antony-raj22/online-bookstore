@@ -462,8 +462,10 @@ def support_chat(request):
         'source': source,
         'suggestions': [
             'Recommend Sci-Fi books',
-            'Where is my order?',
-            'Subscribed user discount',
+            'Recommend Academic books',
+            'Track my order',
+            'Subscription plans',
+            'Cancel an order',
             'Contact support',
         ],
     })
@@ -471,15 +473,53 @@ def support_chat(request):
 
 def home(request):
     books = Book.objects.all()
-    query = request.GET.get('q')
+    query = request.GET.get('q', '').strip()
+    genre = request.GET.get('genre', '').strip()
+    availability = request.GET.get('availability', '').strip()
+    sort = request.GET.get('sort', 'newest').strip()
+
     if query:
-        books = books.filter(Q(title__icontains=query) | Q(author__icontains=query))
-    return render(request, 'store/home.html', {'books': books})
+        books = books.filter(
+            Q(title__icontains=query) |
+            Q(author__icontains=query) |
+            Q(description__icontains=query)
+        )
+    if genre:
+        books = books.filter(genre=genre)
+    if availability == 'in_stock':
+        books = books.filter(stock__gt=0)
+    elif availability == 'new':
+        books = books.filter(created_at__gte=timezone.now() - timezone.timedelta(days=30))
+
+    sort_map = {
+        'newest': '-created_at',
+        'price_low': 'price',
+        'price_high': '-price',
+        'title': 'title',
+        'stock': '-stock',
+    }
+    books = books.order_by(sort_map.get(sort, '-created_at'))
+
+    return render(
+        request,
+        'store/home.html',
+        {
+            'books': books,
+            'all_genres': GENRE_CHOICES,
+            'active_genre': genre,
+            'active_availability': availability,
+            'active_sort': sort,
+            'search_query': query,
+        },
+    )
 
 
 def book_detail(request, book_id):
     book = get_object_or_404(Book, id=book_id)
-    return render(request, 'store/book_detail.html', {'book': book})
+    related_books = list(Book.objects.filter(genre=book.genre).exclude(id=book.id).order_by('-created_at')[:4])
+    if not related_books:
+        related_books = Book.objects.exclude(id=book.id).order_by('-created_at')[:4]
+    return render(request, 'store/book_detail.html', {'book': book, 'related_books': related_books})
 
 
 def category_list(request):
@@ -1073,12 +1113,14 @@ def staff_dashboard(request):
     if book_genre:
         books = books.filter(genre=book_genre)
     books = books.order_by('title')
-    low_stock_books = Book.objects.filter(stock__lte=5).order_by('stock', 'title')[:8]
+    low_stock_queryset = Book.objects.filter(stock__lte=5)
+    low_stock_books = low_stock_queryset.order_by('stock', 'title')[:8]
     context = {
         'total_orders': totals['orders'] or 0,
         'total_revenue': totals['revenue'] or 0,
         'book_count': Book.objects.count(),
         'subscriber_count': Subscriber.objects.filter(is_active=True).count(),
+        'low_stock_count': low_stock_queryset.count(),
         'books': books[:60],
         'book_search_query': book_query,
         'book_search_genre': book_genre,

@@ -10,7 +10,7 @@
         All Categories
       </a>
       {% for slug, meta in all_categories.items %}
-        <a href="{% url 'category_detail' slug=slug %}" 
+        <a href="{% url 'category_detail' slug=slug %}"
            class="genre-pill {% if active_slug == slug %}active{% endif %}">
           {{ meta.name }}
         </a>
@@ -21,7 +21,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="cat-detail-header">
+<section class="cat-detail-header">
   <div class="cat-detail-left">
     <a href="{% url 'category_list' %}" class="cat-back-link">
       <i class="fa-solid fa-arrow-left"></i> All Categories
@@ -30,15 +30,15 @@
     <p>{{ category_desc }}</p>
     <span class="cat-total-badge">{{ books|length }} book{{ books|length|pluralize }}</span>
   </div>
-</div>
+</section>
 
 <div class="cat-filters-bar">
   <div class="filter-group">
     <span class="filter-label">Sort:</span>
     <a href="?sort=popular" class="filter-pill {% if not request.GET.sort or request.GET.sort == 'popular' %}active{% endif %}">Popular</a>
     <a href="?sort=new" class="filter-pill {% if request.GET.sort == 'new' %}active{% endif %}">Newest</a>
-    <a href="?sort=price_asc" class="filter-pill {% if request.GET.sort == 'price_asc' %}active{% endif %}">Price ↑</a>
-    <a href="?sort=price_desc" class="filter-pill {% if request.GET.sort == 'price_desc' %}active{% endif %}">Price ↓</a>
+    <a href="?sort=price_asc" class="filter-pill {% if request.GET.sort == 'price_asc' %}active{% endif %}">Price &uarr;</a>
+    <a href="?sort=price_desc" class="filter-pill {% if request.GET.sort == 'price_desc' %}active{% endif %}">Price &darr;</a>
     <a href="?sort=az" class="filter-pill {% if request.GET.sort == 'az' %}active{% endif %}">A-Z</a>
   </div>
 </div>
@@ -57,7 +57,7 @@
         <div class="book-genre-tag">{{ book.get_genre_display_name }}</div>
         <div class="book-title">{{ book.title }}</div>
         <div class="book-author"><i class="fa-solid fa-pen-nib"></i> {{ book.author }}</div>
-        <div class="book-price amount-highlight">₹{{ book.price }}</div>
+        <div class="book-price amount-highlight">&#8377;{{ book.price }}</div>
         <div class="book-card-actions">
           {% if book.stock > 0 %}
           <a href="{% url 'add_to_cart' book.id %}"
@@ -81,7 +81,7 @@
 </div>
 {% else %}
 <div class="empty-state">
-  <div class="empty-icon">📭</div>
+  <div class="empty-icon"><i class="fa-regular fa-folder-open"></i></div>
   <h3>No books found</h3>
   <p>Try a different search term.</p>
   <a href="{% url 'category_list' %}" class="btn-primary"><i class="fa-solid fa-rotate-left"></i> Back to Categories</a>

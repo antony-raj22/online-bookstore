@@ -12,9 +12,9 @@
   height: 62px;
   border: 0;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--red), #ee7652);
+  background: linear-gradient(135deg, var(--green), var(--blue));
   color: #fff;
-  box-shadow: 0 18px 38px rgba(196, 69, 44, 0.32);
+  box-shadow: 0 18px 38px rgba(47, 124, 95, 0.32);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -25,7 +25,7 @@
 .support-launcher-pulse {
   position: absolute;
   inset: -7px;
-  border: 1px solid rgba(196, 69, 44, 0.32);
+  border: 1px solid rgba(47, 124, 95, 0.32);
   border-radius: 50%;
   animation: supportPulse 1.8s ease-out infinite;
 }
@@ -57,10 +57,10 @@
   display: none;
   grid-template-rows: auto 1fr auto auto;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.68);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.84);
-  box-shadow: 0 24px 70px rgba(30, 42, 62, 0.22);
+  border: 1px solid rgba(214, 225, 218, 0.95);
+  border-radius: 18px;
+  background: rgba(251, 253, 249, 0.92);
+  box-shadow: 0 24px 70px rgba(17, 33, 26, 0.2);
   backdrop-filter: blur(18px);
 }
 
@@ -73,9 +73,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem 1rem 0.85rem;
+  padding: 1rem;
   color: #fff;
-  background: linear-gradient(135deg, var(--text), var(--red));
+  background: linear-gradient(135deg, #14221c, var(--green));
 }
 
 .support-kicker {
@@ -89,9 +89,35 @@
 .support-header h2 {
   font-size: 1.05rem;
   line-height: 1.2;
+  margin: 0.1rem 0 0;
 }
 
-.support-close {
+.support-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.32rem 0 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.support-status span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #8ff0b2;
+  box-shadow: 0 0 0 4px rgba(143, 240, 178, 0.16);
+  flex: 0 0 auto;
+}
+
+.support-header-actions {
+  display: inline-flex;
+  gap: 0.45rem;
+}
+
+.support-close,
+.support-clear {
   width: 36px;
   height: 36px;
   border: 0;
@@ -99,6 +125,11 @@
   background: rgba(255, 255, 255, 0.14);
   color: #fff;
   cursor: pointer;
+}
+
+.support-close:hover,
+.support-clear:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .support-messages {
@@ -119,7 +150,7 @@
 
 .support-message.user {
   align-self: flex-end;
-  background: var(--red);
+  background: var(--green);
   color: #fff;
   border-bottom-right-radius: 5px;
 }
@@ -137,12 +168,23 @@
 }
 
 .support-message.bot a {
-  color: var(--red);
+  color: var(--green);
   font-weight: 800;
 }
 
 .support-message.bot ul {
   margin: 0.45rem 0 0 1rem;
+}
+
+.support-source {
+  display: table;
+  margin-top: 0.52rem;
+  padding: 0.18rem 0.45rem;
+  border-radius: 999px;
+  background: #ecf7f0;
+  color: var(--green);
+  font-size: 0.68rem;
+  font-weight: 800;
 }
 
 .support-typing {
@@ -159,7 +201,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--red);
+  background: var(--green);
   animation: supportTyping 0.9s ease-in-out infinite;
 }
 
@@ -174,7 +216,7 @@
 .support-suggestions {
   display: flex;
   gap: 0.5rem;
-  padding: 0 1rem 0.75rem;
+  padding: 0 1rem 0.85rem;
   overflow-x: auto;
 }
 
@@ -182,21 +224,26 @@
   flex: 0 0 auto;
   border: 1px solid var(--border);
   border-radius: 999px;
-  background: var(--red-light);
-  color: var(--red);
+  background: #edf7f1;
+  color: var(--green);
   padding: 0.45rem 0.7rem;
   font-size: 0.78rem;
   font-weight: 800;
   cursor: pointer;
 }
 
+.support-suggestions button:hover {
+  background: #dcefe5;
+  border-color: rgba(47, 124, 95, 0.28);
+}
+
 .support-form {
   display: grid;
   grid-template-columns: 1fr 44px;
   gap: 0.55rem;
-  padding: 0.85rem;
+  padding: 0.9rem;
   border-top: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.74);
+  background: rgba(255, 255, 255, 0.82);
 }
 
 .support-form input {
@@ -205,19 +252,104 @@
   border-radius: 999px;
   padding: 0.75rem 0.9rem;
   outline: none;
+  background: #fff;
+  color: var(--text);
 }
 
 .support-form input:focus {
-  border-color: var(--red);
-  box-shadow: 0 0 0 3px rgba(196, 69, 44, 0.1);
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(47, 124, 95, 0.12);
 }
 
 .support-form button {
   border: 0;
   border-radius: 50%;
-  background: var(--red);
+  background: var(--green);
   color: #fff;
   cursor: pointer;
+}
+
+:root[data-theme="dark"] .support-launcher {
+  color: #06120d;
+  background: linear-gradient(135deg, var(--green), #8cd6aa);
+  box-shadow: 0 18px 42px rgba(74, 197, 126, 0.24);
+}
+
+:root[data-theme="dark"] .support-launcher-pulse {
+  border-color: rgba(143, 240, 178, 0.34);
+}
+
+:root[data-theme="dark"] .support-unread {
+  border-color: #13211b;
+}
+
+:root[data-theme="dark"] .support-panel {
+  background: rgba(19, 29, 24, 0.96);
+  border-color: var(--border);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+}
+
+:root[data-theme="dark"] .support-header {
+  background: linear-gradient(135deg, #0d1813, #245b47);
+}
+
+:root[data-theme="dark"] .support-messages {
+  background: rgba(13, 20, 17, 0.2);
+}
+
+:root[data-theme="dark"] .support-message.user {
+  background: var(--green);
+  color: #07130f;
+}
+
+:root[data-theme="dark"] .support-message.bot,
+:root[data-theme="dark"] .support-typing {
+  background: var(--surface-soft);
+  color: var(--mid);
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .support-message.bot strong {
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .support-message.bot a,
+:root[data-theme="dark"] .support-source {
+  color: var(--green);
+}
+
+:root[data-theme="dark"] .support-source {
+  background: #113329;
+}
+
+:root[data-theme="dark"] .support-suggestions button {
+  background: var(--surface-soft);
+  color: var(--green);
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .support-suggestions button:hover {
+  background: #12352f;
+  border-color: #1e5e50;
+}
+
+:root[data-theme="dark"] .support-form {
+  background: rgba(17, 27, 22, 0.94);
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .support-form input {
+  background: #0f1c16;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .support-form input::placeholder {
+  color: var(--muted);
+}
+
+:root[data-theme="dark"] .support-form button {
+  color: #07130f;
 }
 
 @keyframes supportPulse {
@@ -238,5 +370,9 @@
 
   .support-panel {
     height: min(590px, calc(100vh - 84px));
+  }
+
+  .support-status {
+    max-width: 230px;
   }
 }

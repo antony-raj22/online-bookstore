@@ -3,6 +3,27 @@
    ============================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
+  const themeToggle = document.getElementById('themeToggle');
+  const applyTheme = theme => {
+    const normalizedTheme = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = normalizedTheme;
+    if (!themeToggle) return;
+    const isDark = normalizedTheme === 'dark';
+    themeToggle.innerHTML = `<i class="fa-solid ${isDark ? 'fa-sun' : 'fa-moon'}"></i>`;
+    themeToggle.setAttribute('aria-label', `Switch to ${isDark ? 'light' : 'dark'} theme`);
+    themeToggle.setAttribute('title', `${isDark ? 'Light' : 'Dark'} theme`);
+  };
+
+  if (themeToggle) {
+    const currentTheme = document.documentElement.dataset.theme || 'light';
+    applyTheme(currentTheme);
+    themeToggle.addEventListener('click', () => {
+      const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('bookstore:theme', nextTheme);
+      applyTheme(nextTheme);
+    });
+  }
+
   document.querySelectorAll('.alert').forEach(alert => {
     setTimeout(() => {
       alert.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
@@ -159,6 +180,170 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  const heroRotator = document.querySelector('[data-hero-rotator]');
+  if (heroRotator) {
+    const heroImages = (heroRotator.dataset.heroImages || '')
+      .split('|')
+      .map(src => src.trim())
+      .filter(Boolean);
+    const interval = Number.parseInt(heroRotator.dataset.heroInterval || '15000', 10);
+    let heroIndex = 0;
+
+    if (heroImages.length > 1) {
+      heroImages.slice(1).forEach(src => {
+        const image = new Image();
+        image.src = src;
+      });
+
+      window.setInterval(() => {
+        heroIndex = (heroIndex + 1) % heroImages.length;
+        heroRotator.classList.add('is-changing');
+        window.setTimeout(() => {
+          heroRotator.src = heroImages[heroIndex];
+          heroRotator.classList.remove('is-changing');
+        }, 260);
+      }, Number.isFinite(interval) && interval > 0 ? interval : 15000);
+    }
+  }
+
+  const wishlistKey = 'bookstore:wishlist';
+  const wishlistButtons = document.querySelectorAll('.wishlist-toggle');
+  const wishlistCount = document.getElementById('wishlistCount');
+  const savedShelf = document.getElementById('savedShelf');
+  const savedBookRow = document.getElementById('savedBookRow');
+  const clearSavedBooks = document.getElementById('clearSavedBooks');
+  const bookCards = document.querySelectorAll('.book-card[data-book-id]');
+  const bookFilterButtons = document.querySelectorAll('[data-book-filter]');
+  const bookFilterCount = document.getElementById('bookFilterCount');
+  const bookFilterEmpty = document.getElementById('bookFilterEmpty');
+  let activeBookFilter = 'all';
+  const getWishlist = () => {
+    try {
+      return JSON.parse(localStorage.getItem(wishlistKey) || '[]');
+    } catch (error) {
+      return [];
+    }
+  };
+  const saveWishlist = items => {
+    localStorage.setItem(wishlistKey, JSON.stringify(items));
+  };
+  const savedBookFromButton = button => ({
+    id: String(button.dataset.bookId),
+    title: button.dataset.bookTitle || 'Saved book',
+    author: button.dataset.bookAuthor || '',
+    price: button.dataset.bookPrice || '',
+    cover: button.dataset.bookCover || '',
+    url: button.dataset.bookUrl || '#',
+  });
+  const renderSavedShelf = () => {
+    if (!savedShelf || !savedBookRow) return;
+    const saved = getWishlist().slice(0, 8);
+    savedBookRow.innerHTML = '';
+    savedShelf.hidden = saved.length === 0;
+
+    saved.forEach(book => {
+      const card = document.createElement('a');
+      card.className = 'saved-book-card';
+      card.href = book.url || '#';
+
+      const image = document.createElement('img');
+      image.src = book.cover || 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=190&h=240&fit=crop';
+      image.alt = book.title || 'Book cover';
+
+      const text = document.createElement('span');
+      const title = document.createElement('strong');
+      title.textContent = book.title || 'Saved book';
+      const author = document.createElement('small');
+      author.textContent = book.author || 'Saved for later';
+      const price = document.createElement('em');
+      price.textContent = book.price || 'View book';
+
+      text.append(title, author, price);
+      card.append(image, text);
+      savedBookRow.appendChild(card);
+    });
+  };
+  const updateWishlistUI = () => {
+    const saved = getWishlist();
+    const savedIds = new Set(saved.map(item => String(item.id)));
+    if (wishlistCount) wishlistCount.textContent = saved.length;
+
+    wishlistButtons.forEach(button => {
+      const isSaved = savedIds.has(String(button.dataset.bookId));
+      button.classList.toggle('is-saved', isSaved);
+      button.setAttribute('aria-label', `${isSaved ? 'Remove' : 'Save'} ${button.dataset.bookTitle}`);
+      if (button.classList.contains('icon-action')) {
+        button.innerHTML = `<i class="${isSaved ? 'fa-solid' : 'fa-regular'} fa-heart"></i>`;
+      } else {
+        button.innerHTML = `<i class="${isSaved ? 'fa-solid' : 'fa-regular'} fa-heart"></i> ${isSaved ? 'Saved' : 'Save Book'}`;
+      }
+    });
+    renderSavedShelf();
+  };
+
+  const applyBookFilter = filter => {
+    activeBookFilter = filter || 'all';
+    const savedIds = new Set(getWishlist().map(item => String(item.id)));
+    let visibleCount = 0;
+
+    bookCards.forEach(card => {
+      const isNew = card.dataset.bookNew === 'true';
+      const inStock = Number.parseInt(card.dataset.bookStock || '0', 10) > 0;
+      const isSaved = savedIds.has(String(card.dataset.bookId));
+      const shouldShow =
+        activeBookFilter === 'all' ||
+        (activeBookFilter === 'new' && isNew) ||
+        (activeBookFilter === 'stock' && inStock) ||
+        (activeBookFilter === 'saved' && isSaved);
+
+      card.hidden = !shouldShow;
+      if (shouldShow) visibleCount += 1;
+    });
+
+    bookFilterButtons.forEach(button => {
+      button.classList.toggle('is-active', button.dataset.bookFilter === activeBookFilter);
+    });
+
+    if (bookFilterCount) {
+      bookFilterCount.textContent = `${visibleCount} book${visibleCount === 1 ? '' : 's'}`;
+    }
+    if (bookFilterEmpty) {
+      bookFilterEmpty.hidden = visibleCount !== 0;
+    }
+  };
+
+  wishlistButtons.forEach(button => {
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      const saved = getWishlist();
+      const id = String(button.dataset.bookId);
+      const existing = saved.findIndex(item => String(item.id) === id);
+      if (existing >= 0) {
+        saved.splice(existing, 1);
+      } else {
+        saved.push(savedBookFromButton(button));
+      }
+      saveWishlist(saved);
+      updateWishlistUI();
+      applyBookFilter(activeBookFilter);
+    });
+  });
+  clearSavedBooks?.addEventListener('click', () => {
+    saveWishlist([]);
+    updateWishlistUI();
+    applyBookFilter(activeBookFilter);
+  });
+  updateWishlistUI();
+
+  bookFilterButtons.forEach(button => {
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      applyBookFilter(button.dataset.bookFilter || 'all');
+    });
+  });
+  applyBookFilter(activeBookFilter);
+
   document.querySelectorAll('.clickable-book').forEach(card => {
     card.addEventListener('click', event => {
       if (event.target.closest('a, button, input, select, textarea')) return;
@@ -255,6 +440,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  document.querySelectorAll('.quick-view').forEach(button => {
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!modal || !modalTitle || !modalText || !modalIcon || !modalConfirm) return;
+      lastFocused = button;
+      modalTitle.textContent = button.dataset.bookTitle || 'Book preview';
+      modalText.innerHTML = `
+        <span class="quick-view-meta">${button.dataset.bookGenre || 'Book'} by ${button.dataset.bookAuthor || 'Unknown author'}</span>
+        <strong class="quick-view-price">${button.dataset.bookPrice || ''}</strong>
+        <span class="quick-view-stock">${button.dataset.bookStock || ''}</span>
+      `;
+      modalIcon.innerHTML = '<i class="fa-solid fa-book-open"></i>';
+      modalConfirm.textContent = 'View Details';
+      modalConfirm.href = button.dataset.bookUrl || '#';
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      modalConfirm.focus();
+    });
+  });
+
   document.querySelectorAll('[data-modal-close]').forEach(closeButton => {
     closeButton.addEventListener('click', closeModal);
   });
@@ -262,4 +469,171 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape') closeModal();
   });
+
+  const recentKey = 'bookstore:recentlyViewed';
+  const readRecentBooks = () => {
+    try {
+      const books = JSON.parse(localStorage.getItem(recentKey) || '[]');
+      return Array.isArray(books) ? books : [];
+    } catch (error) {
+      return [];
+    }
+  };
+  const writeRecentBooks = books => {
+    localStorage.setItem(recentKey, JSON.stringify(books.slice(0, 6)));
+  };
+  const detailBook = document.querySelector('[data-detail-book-id]');
+  if (detailBook) {
+    const book = {
+      id: String(detailBook.dataset.detailBookId),
+      title: detailBook.dataset.detailBookTitle || 'Book',
+      author: detailBook.dataset.detailBookAuthor || '',
+      price: detailBook.dataset.detailBookPrice || '',
+      cover: detailBook.dataset.detailBookCover || '',
+      url: detailBook.dataset.detailBookUrl || window.location.pathname,
+    };
+    const existing = readRecentBooks().filter(item => String(item.id) !== book.id);
+    writeRecentBooks([book, ...existing]);
+  }
+
+  const recentSection = document.getElementById('recentlyViewed');
+  const recentRow = document.getElementById('recentBookRow');
+  if (recentSection && recentRow) {
+    const recentBooks = readRecentBooks().filter(item => item && item.id).slice(0, 4);
+    if (recentBooks.length) {
+      recentRow.innerHTML = '';
+      recentBooks.forEach(book => {
+        const link = document.createElement('a');
+        link.className = 'recent-book-card';
+        link.href = book.url || '#';
+
+        const image = document.createElement('img');
+        image.src = book.cover || 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=190&h=240&fit=crop';
+        image.alt = book.title || 'Book cover';
+
+        const text = document.createElement('span');
+        const title = document.createElement('strong');
+        title.textContent = book.title || 'Book';
+        const author = document.createElement('small');
+        author.textContent = book.author || '';
+        const price = document.createElement('em');
+        price.textContent = book.price || '';
+
+        text.append(title, author, price);
+        link.append(image, text);
+        recentRow.appendChild(link);
+      });
+      recentSection.hidden = false;
+    }
+  }
+
+  const deliveryInput = document.getElementById('deliveryPincode');
+  const deliveryButton = document.getElementById('deliveryEstimateBtn');
+  const deliveryResult = document.getElementById('deliveryResult');
+  if (deliveryInput && deliveryButton && deliveryResult) {
+    const estimateDelivery = () => {
+      const value = deliveryInput.value.replace(/\D/g, '').slice(0, 6);
+      deliveryInput.value = value;
+      if (value.length < 6) {
+        deliveryResult.textContent = 'Enter a 6-digit pincode to check delivery.';
+        deliveryResult.classList.add('is-warning');
+        return;
+      }
+
+      const firstDigit = Number.parseInt(value.charAt(0), 10);
+      const days = firstDigit <= 3 ? '2-4 days' : firstDigit <= 6 ? '3-5 days' : '4-7 days';
+      deliveryResult.textContent = `Estimated delivery: ${days}. Final date appears at checkout.`;
+      deliveryResult.classList.remove('is-warning');
+    };
+    deliveryButton.addEventListener('click', estimateDelivery);
+    deliveryInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        estimateDelivery();
+      }
+    });
+  }
+
+  const copyBookLink = document.getElementById('copyBookLink');
+  if (copyBookLink) {
+    copyBookLink.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        copyBookLink.innerHTML = '<i class="fa-solid fa-check"></i> Copied';
+      } catch (error) {
+        copyBookLink.innerHTML = '<i class="fa-solid fa-link"></i> Copy failed';
+      }
+      window.setTimeout(() => {
+        copyBookLink.innerHTML = '<i class="fa-solid fa-link"></i> Copy Link';
+      }, 1800);
+    });
+  }
+
+  const shareBook = document.getElementById('shareBook');
+  if (shareBook) {
+    shareBook.addEventListener('click', async () => {
+      const title = document.querySelector('.book-detail-info h1')?.textContent.trim() || document.title;
+      if (navigator.share) {
+        try {
+          await navigator.share({ title, url: window.location.href });
+          return;
+        } catch (error) {
+          if (error.name === 'AbortError') return;
+        }
+      }
+      copyBookLink?.click();
+    });
+  }
+
+  const adminPanels = document.querySelectorAll('[data-admin-tab-panel]');
+  if (adminPanels.length) {
+    const adminTabs = ['books', 'orders', 'subscribers', 'stock'];
+    const adminTabLinks = document.querySelectorAll(
+      '.admin-tabs a[href^="#"], .dashboard-stats a[href^="#"], .admin-focus a[href^="#"]'
+    );
+
+    const showAdminTab = tab => {
+      const activeTab = adminTabs.includes(tab) ? tab : 'books';
+      adminPanels.forEach(panel => {
+        panel.hidden = panel.dataset.adminTabPanel !== activeTab;
+      });
+      adminTabLinks.forEach(link => {
+        const linkTab = (link.getAttribute('href') || '').replace('#', '');
+        link.classList.toggle('is-active', linkTab === activeTab);
+        link.classList.toggle('active', linkTab === activeTab);
+        if (link.closest('.admin-tabs')) {
+          link.setAttribute('aria-selected', String(linkTab === activeTab));
+        }
+      });
+      if (window.location.hash !== `#${activeTab}`) {
+        history.replaceState(null, '', `#${activeTab}`);
+      }
+    };
+
+    adminTabLinks.forEach(link => {
+      link.addEventListener('click', event => {
+        const tab = (link.getAttribute('href') || '').replace('#', '');
+        if (!adminTabs.includes(tab)) return;
+        event.preventDefault();
+        showAdminTab(tab);
+      });
+    });
+
+    window.addEventListener('hashchange', () => {
+      showAdminTab(window.location.hash.replace('#', ''));
+    });
+    showAdminTab(window.location.hash.replace('#', ''));
+  }
+
+  const backToTop = document.getElementById('backToTop');
+  if (backToTop) {
+    const toggleBackToTop = () => {
+      backToTop.classList.toggle('is-visible', window.scrollY > 520);
+    };
+    window.addEventListener('scroll', toggleBackToTop, { passive: true });
+    backToTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    toggleBackToTop();
+  }
 });

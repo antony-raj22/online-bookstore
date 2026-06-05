@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const launcher = document.getElementById('supportLauncher');
   const closeButton = document.getElementById('supportClose');
+  const clearButton = document.getElementById('supportClear');
   const panel = document.getElementById('supportPanel');
   const messages = document.getElementById('supportMessages');
   const form = document.getElementById('supportForm');
@@ -55,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const defaultHistory = [{
     role: 'bot',
-    text: 'Hi, I am your BookStore AI support assistant. Ask me for book recommendations, order updates, subscribed-user discounts, or store support.',
+    text: 'Hi, I am your BookStore AI support assistant. I can help with book recommendations, order tracking, subscriptions, discounts, cancellations, and store support.',
   }];
 
   const readHistory = () => {
@@ -75,10 +76,30 @@ document.addEventListener('DOMContentLoaded', () => {
     messages.scrollTop = messages.scrollHeight;
   };
 
-  const addMessage = (role, text, persist = true) => {
+  const setSuggestions = items => {
+    if (!suggestions || !Array.isArray(items) || !items.length) return;
+
+    suggestions.innerHTML = '';
+    items.slice(0, 6).forEach(label => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.supportPrompt = label;
+      button.textContent = label;
+      button.title = label;
+      suggestions.appendChild(button);
+    });
+  };
+
+  const addMessage = (role, text, persist = true, source = '') => {
     const bubble = document.createElement('div');
     bubble.className = `support-message ${role}`;
     bubble.innerHTML = role === 'bot' ? renderMarkdown(text) : escapeHtml(text);
+    if (role === 'bot' && source) {
+      const badge = document.createElement('span');
+      badge.className = 'support-source';
+      badge.textContent = source === 'gemini' ? 'AI answer' : 'Store answer';
+      bubble.appendChild(badge);
+    }
     messages.appendChild(bubble);
     scrollToEnd();
 
@@ -138,7 +159,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const data = await response.json();
       hideTyping();
-      addMessage('bot', data.reply || data.error || 'I could not answer that just now. Please try again.');
+      addMessage('bot', data.reply || data.error || 'I could not answer that just now. Please try again.', true, data.source);
+      setSuggestions(data.suggestions);
     } catch (error) {
       hideTyping();
       addMessage('bot', 'I could not reach support right now. Please try again in a moment.');
@@ -147,6 +169,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   launcher?.addEventListener('click', () => setOpen(true));
   closeButton?.addEventListener('click', () => setOpen(false));
+  clearButton?.addEventListener('click', () => {
+    localStorage.removeItem(storageKey);
+    renderHistory();
+    input.focus();
+  });
 
   form?.addEventListener('submit', event => {
     event.preventDefault();

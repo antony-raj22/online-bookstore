@@ -6,12 +6,12 @@
 <nav class="genre-subnav">
   <div class="container">
     <div class="genre-subnav-inner">
-      <a href="?cat=all{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" 
+      <a href="?cat=all{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}"
          class="genre-pill {% if active_cat == 'all' %}active{% endif %}">
         All
       </a>
       {% for slug, meta in all_categories.items %}
-        <a href="?cat={{ slug }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" 
+        <a href="?cat={{ slug }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}"
            class="genre-pill {% if active_cat == slug %}active{% endif %}">
           {{ meta.name }}
         </a>
@@ -22,20 +22,20 @@
 {% endblock %}
 
 {% block content %}
-<div class="cat-inline-hero">
+<section class="cat-inline-hero">
   <div>
     <h1 class="cat-inline-title">{{ category_name }}</h1>
     <p class="cat-inline-desc">{{ category_desc }}</p>
   </div>
-</div>
+</section>
 
 <div class="cat-filters-bar">
   <div class="filter-group">
     <span class="filter-label">Sort:</span>
     <a href="?cat={{ active_cat }}&sort=popular" class="filter-pill {% if not request.GET.sort or request.GET.sort == 'popular' %}active{% endif %}">Popular</a>
     <a href="?cat={{ active_cat }}&sort=newest" class="filter-pill {% if request.GET.sort == 'newest' %}active{% endif %}">Newest</a>
-    <a href="?cat={{ active_cat }}&sort=price_asc" class="filter-pill {% if request.GET.sort == 'price_asc' %}active{% endif %}">Price ↑</a>
-    <a href="?cat={{ active_cat }}&sort=price_desc" class="filter-pill {% if request.GET.sort == 'price_desc' %}active{% endif %}">Price ↓</a>
+    <a href="?cat={{ active_cat }}&sort=price_asc" class="filter-pill {% if request.GET.sort == 'price_asc' %}active{% endif %}">Price &uarr;</a>
+    <a href="?cat={{ active_cat }}&sort=price_desc" class="filter-pill {% if request.GET.sort == 'price_desc' %}active{% endif %}">Price &darr;</a>
   </div>
   <span class="filter-count">{{ books|length }} book{{ books|length|pluralize }}</span>
 </div>
@@ -54,7 +54,7 @@
         <div class="book-genre-tag">{{ book.get_genre_display_name }}</div>
         <div class="book-title">{{ book.title }}</div>
         <div class="book-author"><i class="fa-solid fa-pen-nib"></i> {{ book.author }}</div>
-        <div class="book-price amount-highlight">₹{{ book.price }}</div>
+        <div class="book-price amount-highlight">&#8377;{{ book.price }}</div>
         <div class="book-card-actions">
           {% if book.stock > 0 %}
           <a href="{% url 'add_to_cart' book.id %}"
@@ -78,7 +78,7 @@
 </div>
 {% else %}
 <div class="empty-state">
-  <div class="empty-icon">📚</div>
+  <div class="empty-icon"><i class="fa-regular fa-folder-open"></i></div>
   <h3>No books found</h3>
   <p>Try adjusting your filters or search for something else.</p>
   <a href="{% url 'category_list' %}" class="btn-secondary">View All Books</a>

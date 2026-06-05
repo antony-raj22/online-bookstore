@@ -17,7 +17,7 @@ def load_env_file(path):
         key, value = line.split('=', 1)
         key = key.strip()
         value = value.strip().strip('"').strip("'")
-        if key.startswith(('EMAIL_', 'DEFAULT_FROM_EMAIL')):
+        if key == 'DEBUG' or key.startswith(('EMAIL_', 'DEFAULT_FROM_EMAIL')):
             os.environ[key] = value
         else:
             os.environ.setdefault(key, value)

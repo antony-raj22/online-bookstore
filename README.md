@@ -1,33 +1,97 @@
 # Online BookStore
 
-A Django online bookstore with book browsing, cart checkout, Razorpay payments, paid subscriptions, subscribed-user discounts, order tracking, staff administration, and an AI-assisted customer support widget.
+A full-featured Django online bookstore with book browsing, category filtering, cart checkout, Razorpay/COD payments, subscriptions, subscribed-user discounts, order tracking, invoices, AI support, dark/light themes, mobile-friendly layouts, and a staff admin dashboard.
 
-## Features
+## Screenshots
 
-- Browse books by category, search, and sort.
-- Add books to cart or use the single-click **Buy** action.
-- Checkout with Razorpay or Cash on Delivery.
-- Track order status, view order history, cancel eligible orders, and print invoices.
-- Subscribe to monthly, quarterly, or yearly plans with Razorpay.
-- Active paid subscribed users receive an automatic 10% discount on book orders.
-- Already subscribed users see their current plan, validity date, remaining days, interests, and benefits instead of the plan purchase form.
-- Customer support chat answers questions about recommendations, orders, subscriptions, subscribed-user discounts, contact details, and policies.
-- Optional Gemini support responses use local store context and fall back to built-in replies when no API key is configured.
-- Staff dashboard manages books, orders, and subscribed users.
+### Home Page
+
+![BookStore home page](output/playwright/mobile-home-after.png)
+
+### Book Detail
+
+![Book detail page](output/playwright/mobile-book-after.png)
+
+### AI Support
+
+![AI support widget](output/playwright/ai-support-dark-updated.png)
+
+### Admin Dashboard
+
+![Admin dashboard tabs](output/playwright/admin-inner-tabs.png)
+
+### Cart
+
+![Cart dark theme](output/playwright/cart-colors-dark.png)
+
+## Main Features
+
+- Book catalog with search, categories, smart filters, sorting, and stock badges.
+- Home hero image rotator that changes images every 15 seconds.
+- Wishlist/saved books shelf using browser storage.
+- Recently viewed books.
+- Quick book preview modal.
+- Book detail page with related books, delivery estimate, copy link, and share button.
+- Cart with auto quantity update, readable light/dark colors, and mobile scrolling.
+- Checkout using Razorpay or Cash on Delivery.
+- Active subscribed users receive an automatic 10% discount on eligible book orders.
+- Subscription plans with paid activation and expiry.
+- Order history, order tracking, cancellation, and invoice/bill pages.
+- AI customer support widget with Gemini support when configured and local fallback replies.
+- Staff dashboard for books, orders, subscribed users, and low stock.
+- Admin page inner tabs for Books, Orders, Subscribed Users, and Low Stock.
+- Light/dark theme toggle.
+- Mobile responsive layout across home, cart, detail, admin, and support pages.
+
+## Tech Stack
+
+- Python
+- Django
+- SQLite for local development
+- HTML templates
+- CSS
+- JavaScript
+- Razorpay checkout integration
+- Optional Gemini API integration
+- Playwright CLI for browser verification screenshots
 
 ## Project Structure
 
 ```text
 online-bookstore/
   backend/
-    bookstore_project/      Django project settings and URLs
-    store/                  Store app, models, views, forms, admin, migrations
+    bookstore_project/
+      settings.py
+      urls.py
+    store/
+      models.py
+      views.py
+      forms.py
+      urls.py
+      admin.py
+      migrations/
   frontend/
-    templates/store/        Django templates
-    static/                 CSS and JavaScript assets
-  manage.py                 Django CLI entry point
-  requirements.txt          Python dependencies
-  .env.example              Environment variable template
+    templates/store/
+      base.html
+      home.html
+      book_detail.html
+      cart.html
+      order_history.html
+      admin_dashboard.html
+      subscribe.html
+    static/
+      js/
+        main.js
+        support.js
+      store/css/
+        style.css
+        support.css
+  output/playwright/
+    verified screenshots and browser-check scripts
+  manage.py
+  requirements.txt
+  .env.example
+  README.md
 ```
 
 ## Local Setup
@@ -42,95 +106,285 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Open `http://127.0.0.1:8000/`.
+Open:
+
+```text
+http://127.0.0.1:8000/
+```
+
+If port `8000` is already in use:
+
+```powershell
+python manage.py runserver 8001
+```
+
+Open:
+
+```text
+http://127.0.0.1:8001/
+```
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and fill in only the services you need.
+Copy `.env.example` to `.env`.
 
-- `SECRET_KEY`: Django secret key.
-- `DEBUG`: `True` for local development, `False` in production.
-- `ALLOWED_HOSTS`: comma-separated hostnames.
-- `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`: enable live Razorpay payments. If omitted, the app uses demo payment buttons.
-- `GEMINI_API_KEY`: enables Gemini AI responses for customer support.
-- `GEMINI_MODEL`: defaults to `gemini-1.5-flash`.
-- `EMAIL_*` and `DEFAULT_FROM_EMAIL`: optional email settings.
-- `SOCIAL_AUTH_*`: optional Google, Facebook, and GitHub login settings.
+```powershell
+copy .env.example .env
+```
 
-## Subscribed-User Discount Rules
+Common variables:
 
-The 10% book-order discount is only applied when all of these are true:
+| Variable | Purpose |
+| --- | --- |
+| `SECRET_KEY` | Django secret key |
+| `DEBUG` | Use `True` locally, `False` in production |
+| `ALLOWED_HOSTS` | Comma-separated allowed hosts |
+| `RAZORPAY_KEY_ID` | Razorpay public key |
+| `RAZORPAY_KEY_SECRET` | Razorpay private secret |
+| `GEMINI_API_KEY` | Optional Gemini support for AI chat |
+| `GEMINI_MODEL` | Gemini model name |
+| `EMAIL_*` | Optional email settings |
+| `DEFAULT_FROM_EMAIL` | Sender email |
+| `SOCIAL_AUTH_*` | Optional social login settings |
 
-1. The customer is signed in.
-2. The signed-in account has an email address.
-3. A `Subscriber` record exists for that email.
-4. The subscriber is active, paid, and not expired.
+## Useful Commands
 
-At checkout, the app stores:
+```powershell
+python manage.py check
+python manage.py makemigrations
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+python manage.py test store
+```
 
-- `subtotal_amount`: cart total before discount.
-- `discount_amount`: subscribed-user discount amount.
-- `total_amount`: final payable amount after discount.
+## User Flow
 
-Payment pages and invoices show the subtotal, discount, and final total.
-
-## Razorpay Order Confirmation
-
-Razorpay orders are not confirmed when checkout details are submitted. The app first creates an awaiting-payment order and sends the customer to Razorpay.
-
-- Before payment succeeds: the order is not confirmed, no bill is shown, and stock is not reserved.
-- After Razorpay verification succeeds: stock is reserved, payment status becomes paid, order status becomes processing, tracking is created, and the bill becomes available.
-- If Razorpay verification fails: the order remains unconfirmed and can be retried from **My Orders**.
-- Cash on Delivery orders are confirmed immediately because online payment is not required.
-
-## Customer Support AI
-
-The support widget lives in the base template and posts messages to `/support/chat/`.
-
-When `GEMINI_API_KEY` is available, the app sends Gemini a limited store context containing:
-
-- the current user type,
-- whether the user has an active subscription,
-- subscription prices,
-- relevant books,
-- recent authenticated-user orders.
-
-If Gemini is unavailable or no API key is configured, local rule-based replies handle book recommendations, order tracking, subscription plans, 10% subscribed-user discount questions, support contact details, privacy, and return/refund policy answers.
+1. User opens the home page.
+2. User searches or filters books.
+3. User opens a book detail page or quick preview.
+4. User saves books, checks delivery estimate, or shares the book link.
+5. User adds books to cart or clicks Buy.
+6. User checks out with Razorpay or Cash on Delivery.
+7. User tracks the order from order history or the tracking page.
+8. User can cancel eligible pending/processing orders.
+9. User can subscribe to receive 10% off eligible orders.
 
 ## Subscription Flow
 
 1. User opens `/subscribe/`.
-2. User selects a plan and submits name, email, and reading interests.
-3. App creates or updates the subscriber record as awaiting payment.
-4. User completes Razorpay or demo payment.
-5. Subscriber is marked active and paid, with an expiry date based on the selected plan.
-6. Future visits to `/subscribe/` show the active plan validity and benefits instead of the plan form.
-7. Future checkouts with a matching signed-in account email receive the 10% discount.
+2. User selects monthly, quarterly, or yearly plan.
+3. User submits name, email, mobile number, and reading interests.
+4. App creates or updates the subscriber record.
+5. User completes payment.
+6. Subscriber becomes active and receives an expiry date.
+7. Matching signed-in users receive the 10% checkout discount.
+
+## Subscribed-User Discount Rules
+
+The 10% discount applies only when:
+
+- The customer is signed in.
+- The signed-in user has an email address.
+- A `Subscriber` record exists for that email.
+- The subscriber is active.
+- The subscription is paid.
+- The subscription is not expired.
+
+The order stores:
+
+- `subtotal_amount`
+- `discount_amount`
+- `total_amount`
+
+Invoices and checkout pages show the discount when applicable.
+
+## Payment Behavior
+
+### Razorpay
+
+Razorpay orders are created as awaiting payment first.
+
+Before payment succeeds:
+
+- Order is not confirmed.
+- Stock is not reserved.
+- Bill is not shown.
+- User can retry payment from order history.
+
+After payment succeeds:
+
+- Order becomes paid.
+- Stock is reserved.
+- Order status becomes processing.
+- Tracking number is created.
+- Bill becomes available.
+
+### Cash on Delivery
+
+COD orders are confirmed immediately because online payment is not required.
+
+## AI Support
+
+The AI support widget is available on all pages through the base template.
+
+Endpoint:
+
+```text
+/support/chat/
+```
+
+With `GEMINI_API_KEY`, the widget can use Gemini with limited store context:
+
+- current user type,
+- active subscription state,
+- subscription plan prices,
+- matching books,
+- recent authenticated-user orders.
+
+Without Gemini, the app uses local fallback replies for:
+
+- book recommendations,
+- order tracking,
+- cancellation help,
+- subscription plans,
+- 10% discount questions,
+- contact information,
+- privacy and terms.
+
+## Admin Dashboard
+
+Staff users can open the custom admin dashboard.
+
+Features:
+
+- Summary cards for total orders, revenue, books, and subscribed users.
+- Clickable dashboard cards.
+- Inner tabs for:
+  - Books
+  - Orders
+  - Subscribed Users
+  - Low Stock
+- Add new books.
+- Search/manage books.
+- Update order status and payment status.
+- Open bills.
+- View low-stock books.
+- Activate/deactivate subscribers.
+- Link to Django Admin.
+
+The standard Django admin is also available at:
+
+```text
+/admin/
+```
+
+## Theme And Mobile UI
+
+The site includes:
+
+- light/dark theme toggle,
+- dark theme support for cart, admin, order history, support widget, categories, and subscription page,
+- responsive mobile layouts,
+- mobile-friendly book detail page,
+- mobile cart table scrolling,
+- compact admin tabs and panels.
+
+## Verified Screenshots
+
+The `output/playwright/` folder contains screenshots captured during browser verification.
+
+Useful files:
+
+```text
+output/playwright/mobile-home-after.png
+output/playwright/mobile-book-after.png
+output/playwright/ai-support-dark-updated.png
+output/playwright/admin-inner-tabs.png
+output/playwright/cart-colors-dark.png
+output/playwright/saved-shelf-home.png
+output/playwright/hero-rotator.png
+```
+
+## Browser Verification
+
+This project has been checked with Playwright CLI scripts stored in `output/playwright/`.
+
+Examples:
+
+```powershell
+npx --yes --package @playwright/cli playwright-cli run-code --filename output\playwright\verify_mobile_after.js
+npx --yes --package @playwright/cli playwright-cli run-code --filename output\playwright\verify_admin_inner_tabs.js
+npx --yes --package @playwright/cli playwright-cli run-code --filename output\playwright\verify_cart_colors.js
+```
+
+## GitHub Setup
+
+This repository is ready for GitHub.
+
+Included GitHub-friendly files:
+
+- `.gitignore` for secrets, virtual environments, local databases, cache files, and generated local scripts.
+- `.env.example` for safe environment variable documentation.
+- `.github/workflows/django.yml` for Django CI.
+- `CONTRIBUTING.md` for local development and pull request checks.
+
+Before pushing:
+
+```powershell
+git status
+python manage.py check
+python manage.py test store
+```
+
+Recommended first push:
+
+```powershell
+git add .
+git commit -m "Prepare bookstore project for GitHub"
+git branch -M main
+git remote add origin https://github.com/<your-username>/<your-repo>.git
+git push -u origin main
+```
+
+Do not commit:
+
+- `.env`
+- `.venv/`
+- `venv/`
+- `db.sqlite3`
+- `.playwright-cli/`
 
 ## Git Hygiene
 
-Virtual environment folders are intentionally ignored:
+Virtual environments should not be committed.
+
+Ignored folders:
 
 ```text
 .venv/
 venv/
 ```
 
-If either folder was already committed, remove it from Git tracking without deleting local files:
+If a virtual environment was already tracked:
 
 ```powershell
 git rm -r --cached .venv venv
 git commit -m "Remove virtual environments from repository"
 ```
 
-Keep dependencies in `requirements.txt`, not inside committed virtual environment directories.
+Keep dependencies in:
 
-## Useful Commands
-
-```powershell
-python manage.py makemigrations
-python manage.py migrate
-python manage.py runserver
-python manage.py createsuperuser
-python manage.py check
+```text
+requirements.txt
 ```
+
+## Development Notes
+
+- Main backend logic is in `backend/store/views.py`.
+- Main models are in `backend/store/models.py`.
+- Main shared template is `frontend/templates/store/base.html`.
+- Main UI styles are in `frontend/static/store/css/style.css`.
+- Support widget styles are in `frontend/static/store/css/support.css`.
+- Main frontend behavior is in `frontend/static/js/main.js`.
+- Support chat behavior is in `frontend/static/js/support.js`.

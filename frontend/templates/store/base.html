@@ -5,13 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>{% block title %}BookStore | Discover your next great read{% endblock %}</title>
   {% load static %}
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%2317201d'/%3E%3Cpath d='M18 16h18a10 10 0 0 1 10 10v22H24a8 8 0 0 1-8-8V18a2 2 0 0 1 2-2Z' fill='%23fff7e6'/%3E%3Cpath d='M24 16v28h20' fill='none' stroke='%23b7342a' stroke-width='4'/%3E%3C/svg%3E">
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   <!-- Font Awesome 6 Free -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
   <!-- App styles -->
-  <link rel="stylesheet" href="{% static 'store/css/style.css' %}">
-  <link rel="stylesheet" href="{% static 'store/css/support.css' %}">
+  <script>
+    (function () {
+      try {
+        var savedTheme = localStorage.getItem('bookstore:theme');
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = savedTheme || (prefersDark ? 'dark' : 'light');
+      } catch (error) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="{% static 'store/css/style.css' %}?v=19">
+  <link rel="stylesheet" href="{% static 'store/css/support.css' %}?v=8">
   {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -47,6 +59,9 @@
           <i class="fa-solid fa-cart-shopping"></i>
           <span class="cart-count">{{ cart_count }}</span>
         </a>
+        <button type="button" class="theme-toggle" id="themeToggle" aria-label="Switch to dark theme" title="Theme">
+          <i class="fa-solid fa-moon"></i>
+        </button>
 
         {% if user.is_authenticated %}
           <div class="nav-user-menu">
@@ -224,23 +239,31 @@
       <header class="support-header">
         <div>
           <span class="support-kicker">BookStore AI</span>
-          <h2>Customer Support</h2>
+          <h2>AI Support</h2>
+          <p class="support-status"><span></span> Online assistant for books, orders, and plans</p>
         </div>
-        <button class="support-close" id="supportClose" type="button" aria-label="Close support chat">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <div class="support-header-actions">
+          <button class="support-clear" id="supportClear" type="button" aria-label="Reset support chat" title="Reset chat">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+          <button class="support-close" id="supportClose" type="button" aria-label="Close support chat" title="Close">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
       </header>
 
       <div class="support-messages" id="supportMessages" aria-live="polite"></div>
 
       <div class="support-suggestions" id="supportSuggestions">
         <button type="button" data-support-prompt="Recommend Sci-Fi books">Recommend Sci-Fi</button>
-        <button type="button" data-support-prompt="Where is my order?">Track my order</button>
-        <button type="button" data-support-prompt="Subscribed user discount">10% discount</button>
+        <button type="button" data-support-prompt="Recommend Academic books">Academic books</button>
+        <button type="button" data-support-prompt="Where is my order?">Track order</button>
+        <button type="button" data-support-prompt="Subscription plans">Plans</button>
+        <button type="button" data-support-prompt="Cancel an order">Cancel order</button>
       </div>
 
       <form class="support-form" id="supportForm">
-        <input type="text" id="supportInput" placeholder="Ask about books, orders, subscribed discounts..." autocomplete="off">
+        <input type="text" id="supportInput" placeholder="Ask AI support about books, orders, discounts..." autocomplete="off">
         <button type="submit" aria-label="Send message">
           <i class="fa-solid fa-paper-plane"></i>
         </button>
@@ -248,8 +271,12 @@
     </section>
   </div>
 
-  <script src="{% static 'js/main.js' %}"></script>
-  <script src="{% static 'js/support.js' %}"></script>
+  <button type="button" class="back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <script src="{% static 'js/main.js' %}?v=17"></script>
+  <script src="{% static 'js/support.js' %}?v=8"></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>
