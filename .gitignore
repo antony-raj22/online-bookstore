@@ -16,3 +16,4 @@ htmlcov/
 
 # Keep screenshot PNGs for README, ignore local verification scripts.
 output/playwright/*.js
+output/*.sqlite3
