@@ -6,11 +6,11 @@ A full-featured Django online bookstore with book browsing, category filtering, 
 
 ### Home Page
 
-![BookStore home page](output/playwright/mobile-home-after.png)
+![BookStore desktop home page](output/playwright/bookstore-home-final.png)
 
 ### Book Detail
 
-![Book detail page](output/playwright/mobile-book-after.png)
+![Book detail desktop page](output/playwright/basic-features-book-detail.png)
 
 ### AI Support
 
@@ -297,8 +297,8 @@ The `output/playwright/` folder contains screenshots captured during browser ver
 Useful files:
 
 ```text
-output/playwright/mobile-home-after.png
-output/playwright/mobile-book-after.png
+output/playwright/bookstore-home-final.png
+output/playwright/basic-features-book-detail.png
 output/playwright/ai-support-dark-updated.png
 output/playwright/admin-inner-tabs.png
 output/playwright/cart-colors-dark.png
