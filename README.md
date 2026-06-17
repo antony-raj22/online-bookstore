@@ -1,59 +1,31 @@
-# Online BookStore
+# Online Bookstore
 
-A full-featured Django online bookstore with book browsing, category filtering, cart checkout, Razorpay/COD payments, subscriptions, subscribed-user discounts, order tracking, invoices, AI support, dark/light themes, mobile-friendly layouts, and a staff admin dashboard.
+A Django-powered online bookstore with a React/Vite shopping frontend. The backend manages books, users, carts, orders, subscriptions, payments, and support APIs. The React app provides the customer-facing catalog, category browsing, cart experience, responsive layout, and light/dark theme.
 
-## Screenshots
+## Features
 
-### Home Page
-
-![BookStore desktop home page](output/playwright/bookstore-home-final.png)
-
-### Book Detail
-
-![Book detail desktop page](output/playwright/basic-features-book-detail.png)
-
-### AI Support
-
-![AI support widget](output/playwright/ai-support-dark-updated.png)
-
-### Admin Dashboard
-
-![Admin dashboard tabs](output/playwright/admin-inner-tabs.png)
-
-### Cart
-
-![Cart dark theme](output/playwright/cart-colors-dark.png)
-
-## Main Features
-
-- Book catalog with search, categories, smart filters, sorting, and stock badges.
-- Home hero image rotator that changes images every 15 seconds.
-- Wishlist/saved books shelf using browser storage.
-- Recently viewed books.
-- Quick book preview modal.
-- Book detail page with related books, delivery estimate, copy link, and share button.
-- Cart with auto quantity update, readable light/dark colors, and mobile scrolling.
-- Checkout using Razorpay or Cash on Delivery.
-- Active subscribed users receive an automatic 10% discount on eligible book orders.
-- Subscription plans with paid activation and expiry.
-- Order history, order tracking, cancellation, and invoice/bill pages.
-- AI customer support widget with Gemini support when configured and local fallback replies.
-- Staff dashboard for books, orders, subscribed users, and low stock.
-- Admin page inner tabs for Books, Orders, Subscribed Users, and Low Stock.
-- Light/dark theme toggle.
-- Mobile responsive layout across home, cart, detail, admin, and support pages.
+- Book catalog with search, genre filters, availability filters, sorting, stock status, and related books.
+- React frontend with home, categories, book detail, and cart views.
+- Session-based cart API with add, update, remove, item count, and totals.
+- Django authentication support with user profile data.
+- Razorpay and Cash on Delivery order model support.
+- Subscription plans for monthly, quarterly, and yearly readers.
+- 10% subscribed-user discount logic for eligible checkout flows.
+- Order tracking fields, invoice-ready order totals, cancellation state, and payment status tracking.
+- Optional Gemini-powered support chat with local fallback behavior.
+- Django admin support for managing books, orders, subscribers, and users.
+- GitHub Actions workflow for Django checks and tests.
 
 ## Tech Stack
 
-- Python
-- Django
+- Python 3.12+
+- Django 5.2+
 - SQLite for local development
-- HTML templates
-- CSS
-- JavaScript
-- Razorpay checkout integration
+- React 18
+- Vite 6
+- JavaScript, HTML, CSS
+- Razorpay integration fields
 - Optional Gemini API integration
-- Playwright CLI for browser verification screenshots
 
 ## Project Structure
 
@@ -63,78 +35,79 @@ online-bookstore/
     bookstore_project/
       settings.py
       urls.py
+      wsgi.py
     store/
-      models.py
-      views.py
-      forms.py
-      urls.py
       admin.py
+      apps.py
+      forms.py
+      models.py
+      urls.py
+      views.py
+      management/commands/
       migrations/
   frontend/
-    templates/store/
-      base.html
-      home.html
-      book_detail.html
-      cart.html
-      order_history.html
-      admin_dashboard.html
-      subscribe.html
+    react-app/
+      index.html
+      package.json
+      package-lock.json
+      vite.config.js
+      src/
+        main.jsx
+        styles.css
     static/
       js/
-        main.js
-        support.js
       store/css/
-        style.css
-        support.css
-  output/playwright/
-    verified screenshots and browser-check scripts
+  .github/workflows/django.yml
+  .env.example
+  .gitignore
+  CONTRIBUTING.md
   manage.py
   requirements.txt
-  .env.example
-  README.md
 ```
 
 ## Local Setup
 
+Create and activate a virtual environment:
+
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+```
+
+Install Python dependencies:
+
+```powershell
 pip install -r requirements.txt
+```
+
+Create your local environment file:
+
+```powershell
 copy .env.example .env
+```
+
+Run migrations and create an admin user:
+
+```powershell
 python manage.py migrate
 python manage.py createsuperuser
+```
+
+Start Django:
+
+```powershell
 python manage.py runserver
 ```
 
-Open:
+The Django backend runs at:
 
 ```text
 http://127.0.0.1:8000/
 ```
 
-If port `8000` is already in use:
-
-```powershell
-python manage.py runserver 8001
-```
-
-Open:
-
-```text
-http://127.0.0.1:8001/
-```
-
 ## React Frontend
 
-A React/Vite frontend is available in `frontend/react-app`. It uses the Django app for JSON APIs, sessions, cart data, checkout, auth, and subscription flows.
-
-Run Django first:
-
-```powershell
-python manage.py runserver
-```
-
-Then run React in another terminal:
+Open a second terminal and run:
 
 ```powershell
 cd frontend\react-app
@@ -142,41 +115,54 @@ npm install
 npm run dev
 ```
 
-Open:
+The React app runs at:
 
 ```text
 http://127.0.0.1:5173/
 ```
 
-Build React for production:
+The React dev server calls the Django API, so keep Django running at the same time.
+
+Build the React app:
 
 ```powershell
 cd frontend\react-app
 npm run build
 ```
 
-## Environment Variables
-
-Copy `.env.example` to `.env`.
+Preview the production build:
 
 ```powershell
-copy .env.example .env
+npm run preview
 ```
 
-Common variables:
+## Environment Variables
+
+Copy `.env.example` to `.env` before running locally.
 
 | Variable | Purpose |
 | --- | --- |
 | `SECRET_KEY` | Django secret key |
-| `DEBUG` | Use `True` locally, `False` in production |
-| `ALLOWED_HOSTS` | Comma-separated allowed hosts |
+| `DEBUG` | Use `True` for local development |
+| `ALLOWED_HOSTS` | Comma-separated Django allowed hosts |
+| `CSRF_TRUSTED_ORIGINS` | Optional trusted origins for the React dev server |
 | `RAZORPAY_KEY_ID` | Razorpay public key |
-| `RAZORPAY_KEY_SECRET` | Razorpay private secret |
-| `GEMINI_API_KEY` | Optional Gemini support for AI chat |
+| `RAZORPAY_KEY_SECRET` | Razorpay secret key |
+| `GEMINI_API_KEY` | Optional Gemini key for support chat |
 | `GEMINI_MODEL` | Gemini model name |
-| `EMAIL_*` | Optional email settings |
-| `DEFAULT_FROM_EMAIL` | Sender email |
-| `SOCIAL_AUTH_*` | Optional social login settings |
+| `EMAIL_HOST` | SMTP host for password reset email |
+| `EMAIL_PORT` | SMTP port |
+| `EMAIL_USE_TLS` | TLS setting for SMTP |
+| `EMAIL_HOST_USER` | SMTP username |
+| `EMAIL_HOST_PASSWORD` | SMTP password or app password |
+| `DEFAULT_FROM_EMAIL` | Sender address |
+| `SOCIAL_AUTH_*` | Optional OAuth credentials |
+
+Example local React origin:
+
+```text
+CSRF_TRUSTED_ORIGINS=http://127.0.0.1:5173,http://localhost:5173
+```
 
 ## Useful Commands
 
@@ -185,182 +171,63 @@ python manage.py check
 python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser
-python manage.py runserver
 python manage.py test store
+python manage.py runserver
 ```
 
-## User Flow
-
-1. User opens the home page.
-2. User searches or filters books.
-3. User opens a book detail page or quick preview.
-4. User saves books, checks delivery estimate, or shares the book link.
-5. User adds books to cart or clicks Buy.
-6. User checks out with Razorpay or Cash on Delivery.
-7. User tracks the order from order history or the tracking page.
-8. User can cancel eligible pending/processing orders.
-9. User can subscribe to receive 10% off eligible orders.
-
-## Subscription Flow
-
-1. User opens `/subscribe/`.
-2. User selects monthly, quarterly, or yearly plan.
-3. User submits name, email, mobile number, and reading interests.
-4. App creates or updates the subscriber record.
-5. User completes payment.
-6. Subscriber becomes active and receives an expiry date.
-7. Matching signed-in users receive the 10% checkout discount.
-
-## Subscribed-User Discount Rules
-
-The 10% discount applies only when:
-
-- The customer is signed in.
-- The signed-in user has an email address.
-- A `Subscriber` record exists for that email.
-- The subscriber is active.
-- The subscription is paid.
-- The subscription is not expired.
-
-The order stores:
-
-- `subtotal_amount`
-- `discount_amount`
-- `total_amount`
-
-Invoices and checkout pages show the discount when applicable.
-
-## Payment Behavior
-
-### Razorpay
-
-Razorpay orders are created as awaiting payment first.
-
-Before payment succeeds:
-
-- Order is not confirmed.
-- Stock is not reserved.
-- Bill is not shown.
-- User can retry payment from order history.
-
-After payment succeeds:
-
-- Order becomes paid.
-- Stock is reserved.
-- Order status becomes processing.
-- Tracking number is created.
-- Bill becomes available.
-
-### Cash on Delivery
-
-COD orders are confirmed immediately because online payment is not required.
-
-## AI Support
-
-The AI support widget is available on all pages through the base template.
-
-Endpoint:
-
-```text
-/support/chat/
-```
-
-With `GEMINI_API_KEY`, the widget can use Gemini with limited store context:
-
-- current user type,
-- active subscription state,
-- subscription plan prices,
-- matching books,
-- recent authenticated-user orders.
-
-Without Gemini, the app uses local fallback replies for:
-
-- book recommendations,
-- order tracking,
-- cancellation help,
-- subscription plans,
-- 10% discount questions,
-- contact information,
-- privacy and terms.
-
-## Admin Dashboard
-
-Staff users can open the custom admin dashboard.
-
-Features:
-
-- Summary cards for total orders, revenue, books, and subscribed users.
-- Clickable dashboard cards.
-- Inner tabs for:
-  - Books
-  - Orders
-  - Subscribed Users
-  - Low Stock
-- Add new books.
-- Search/manage books.
-- Update order status and payment status.
-- Open bills.
-- View low-stock books.
-- Activate/deactivate subscribers.
-- Link to Django Admin.
-
-The standard Django admin is also available at:
-
-```text
-/admin/
-```
-
-## Theme And Mobile UI
-
-The site includes:
-
-- light/dark theme toggle,
-- dark theme support for cart, admin, order history, support widget, categories, and subscription page,
-- responsive mobile layouts,
-- mobile-friendly book detail page,
-- mobile cart table scrolling,
-- compact admin tabs and panels.
-
-## Verified Screenshots
-
-The `output/playwright/` folder contains screenshots captured during browser verification.
-
-Useful files:
-
-```text
-output/playwright/bookstore-home-final.png
-output/playwright/basic-features-book-detail.png
-output/playwright/ai-support-dark-updated.png
-output/playwright/admin-inner-tabs.png
-output/playwright/cart-colors-dark.png
-output/playwright/saved-shelf-home.png
-output/playwright/hero-rotator.png
-```
-
-## Browser Verification
-
-This project has been checked with Playwright CLI scripts stored in `output/playwright/`.
-
-Examples:
+Seed sample books if needed:
 
 ```powershell
-npx --yes --package @playwright/cli playwright-cli run-code --filename output\playwright\verify_mobile_after.js
-npx --yes --package @playwright/cli playwright-cli run-code --filename output\playwright\verify_admin_inner_tabs.js
-npx --yes --package @playwright/cli playwright-cli run-code --filename output\playwright\verify_cart_colors.js
+python manage.py seed_books
 ```
 
-## GitHub Setup
+Test email configuration:
 
-This repository is ready for GitHub.
+```powershell
+python manage.py test_email
+```
 
-Included GitHub-friendly files:
+## API Endpoints
 
-- `.gitignore` for secrets, virtual environments, local databases, cache files, and generated local scripts.
-- `.env.example` for safe environment variable documentation.
-- `.github/workflows/django.yml` for Django CI.
-- `CONTRIBUTING.md` for local development and pull request checks.
+The React app currently uses these Django JSON endpoints:
 
-Before pushing:
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/bootstrap/` | Current user, cart, and category data |
+| `GET` | `/api/books/` | Book list with filters and sorting |
+| `GET` | `/api/books/<book_id>/` | Book detail and related books |
+| `GET` | `/api/categories/` | Category list with book counts |
+| `GET` | `/api/cart/` | Current cart |
+| `POST` | `/api/cart/add/<book_id>/` | Add one book to cart |
+| `POST` | `/api/cart/update/` | Update cart quantities |
+| `POST` | `/api/cart/remove/<book_id>/` | Remove a book from cart |
+
+The existing Django views also contain checkout, subscription, order, payment, support, and admin-dashboard logic used by the backend.
+
+## Development Notes
+
+- Main backend logic: `backend/store/views.py`
+- Data models: `backend/store/models.py`
+- URL routes: `backend/store/urls.py`
+- Django settings: `backend/bookstore_project/settings.py`
+- React entry point: `frontend/react-app/src/main.jsx`
+- React styles: `frontend/react-app/src/styles.css`
+- Static legacy assets: `frontend/static/`
+
+## Git And GitHub
+
+Files intentionally ignored:
+
+- `.env`
+- `.env.*` except `.env.example`
+- `.venv/`
+- `venv/`
+- `db.sqlite3`
+- `frontend/react-app/node_modules/`
+- `frontend/react-app/dist/`
+- local Playwright output scripts and temporary artifacts
+
+Before pushing changes:
 
 ```powershell
 git status
@@ -368,54 +235,28 @@ python manage.py check
 python manage.py test store
 ```
 
-Recommended first push:
+Commit and push:
 
 ```powershell
 git add .
-git commit -m "Prepare bookstore project for GitHub"
-git branch -M main
-git remote add origin https://github.com/<your-username>/<your-repo>.git
-git push -u origin main
+git commit -m "Describe your change"
+git push origin main
 ```
 
-Do not commit:
+## CI
 
-- `.env`
-- `.venv/`
-- `venv/`
-- `db.sqlite3`
-- `.playwright-cli/`
+GitHub Actions runs on pushes and pull requests to `main` or `master`.
 
-## Git Hygiene
+The workflow:
 
-Virtual environments should not be committed.
+1. Checks out the repository.
+2. Installs Python dependencies from `requirements.txt`.
+3. Runs `python manage.py check`.
+4. Runs `python manage.py test store`.
 
-Ignored folders:
+## Security Notes
 
-```text
-.venv/
-venv/
-```
-
-If a virtual environment was already tracked:
-
-```powershell
-git rm -r --cached .venv venv
-git commit -m "Remove virtual environments from repository"
-```
-
-Keep dependencies in:
-
-```text
-requirements.txt
-```
-
-## Development Notes
-
-- Main backend logic is in `backend/store/views.py`.
-- Main models are in `backend/store/models.py`.
-- Main shared template is `frontend/templates/store/base.html`.
-- Main UI styles are in `frontend/static/store/css/style.css`.
-- Support widget styles are in `frontend/static/store/css/support.css`.
-- Main frontend behavior is in `frontend/static/js/main.js`.
-- Support chat behavior is in `frontend/static/js/support.js`.
+- Do not commit `.env`, local databases, virtual environments, or generated dependency folders.
+- Use strong production values for `SECRET_KEY`, `ALLOWED_HOSTS`, and `CSRF_TRUSTED_ORIGINS`.
+- Store Razorpay, Gemini, email, and OAuth secrets outside GitHub source code.
+- Review `npm audit` output before deploying frontend dependencies to production.
