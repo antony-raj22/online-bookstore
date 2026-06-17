@@ -1,0 +1,82 @@
+{% extends 'store/base.html' %}
+{% block title %}My Orders | BookStore{% endblock %}
+
+{% block content %}
+
+<div class="page-hero">
+  <span class="eyebrow">Account</span>
+  <h1>My Orders</h1>
+</div>
+
+{% if orders %}
+<div class="orders-list">
+  {% for order in orders %}
+  <div class="order-card">
+    <div class="order-card-header">
+      <div>
+        <div class="order-id">Order #{{ order.id }}</div>
+        <div class="order-date">{{ order.created_at|date:"F j, Y" }}</div>
+      </div>
+      <div class="order-header-actions">
+        <span class="status-pill status-{{ order.status }}">{{ order.get_status_display }}</span>
+        <div class="order-total-badge">₹{{ order.total_amount }}</div>
+      </div>
+    </div>
+    <div class="order-card-body">
+      {% for item in order.items.all %}
+      <div class="order-item">
+        <span class="order-item-qty">x{{ item.quantity }}</span>
+        <span class="order-item-title">{{ item.book.title }}</span>
+        <span class="order-item-price">@ ₹{{ item.price }}</span>
+      </div>
+      {% endfor %}
+      {% if order.status == 'cancelled' and order.cancellation_reason %}
+      <div class="cancel-reason-note">
+        <strong>Cancellation reason:</strong> {{ order.cancellation_reason }}
+      </div>
+      {% endif %}
+      {% if order.payment_method == 'razorpay' and not order.paid and order.status != 'cancelled' %}
+      <div class="cancel-reason-note">
+        <strong>Not confirmed:</strong> Complete Razorpay payment to confirm this order.
+      </div>
+      {% endif %}
+    </div>
+    <div class="order-card-footer">
+      {% if order.paid or order.payment_method == 'cod' %}
+      <a href="{% url 'bill' order.id %}" class="btn-secondary"><i class="fa-solid fa-file-invoice"></i> Bill</a>
+      <a href="{% url 'track_order' %}?order_id={{ order.id }}&postal_code={{ order.postal_code }}" class="btn-primary">
+        <i class="fa-solid fa-location-dot"></i> Track
+      </a>
+      {% endif %}
+      {% if not order.paid and order.payment_method != 'cod' %}
+      <a href="{% url 'payment' order.id %}" class="btn-success"><i class="fa-solid fa-credit-card"></i> Pay Now</a>
+      {% endif %}
+      {% if order.can_be_cancelled %}
+      <details class="cancel-order-panel">
+        <summary class="btn-remove"><i class="fa-solid fa-ban"></i> Cancel Order</summary>
+        <form method="POST" action="{% url 'cancel_order' order.id %}" class="cancel-order-form">
+          {% csrf_token %}
+          <label for="cancel_reason_{{ order.id }}">Cancellation reason</label>
+          <textarea id="cancel_reason_{{ order.id }}" name="reason" rows="3" maxlength="500" required
+                    placeholder="Tell us why you want to cancel this order"></textarea>
+          <button type="submit" class="btn-dark">
+            <i class="fa-solid fa-circle-xmark"></i> Submit Cancellation
+          </button>
+        </form>
+      </details>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+  <h3>No orders yet</h3>
+  <p>You haven't placed any orders. Time to start reading!</p>
+  <a href="{% url 'home' %}" class="btn-primary">Browse Books</a>
+</div>
+{% endif %}
+
+{% endblock %}

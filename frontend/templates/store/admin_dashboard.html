@@ -1,0 +1,223 @@
+{% extends 'store/base.html' %}
+{% block title %}Admin Page | BookStore{% endblock %}
+
+{% block content %}
+<div class="page-hero admin-hero">
+  <div>
+    <span class="eyebrow">Staff dashboard</span>
+    <h1>Admin Page</h1>
+  </div>
+  <a href="/admin/" class="btn-dark django-admin-btn"><i class="fa-solid fa-screwdriver-wrench"></i> Django Admin</a>
+</div>
+
+<div class="dashboard-stats">
+  <a href="#orders" class="stat-card"><span>Total Orders</span><strong>{{ total_orders }}</strong></a>
+  <a href="#orders" class="stat-card"><span>Revenue</span><strong>&#8377;{{ total_revenue|floatformat:2 }}</strong></a>
+  <a href="#books" class="stat-card"><span>Books</span><strong>{{ book_count }}</strong></a>
+  <a href="#subscribers" class="stat-card"><span>Subscribed Users</span><strong>{{ subscriber_count }}</strong></a>
+</div>
+
+<div class="admin-tabs">
+  <a href="#books" class="filter-pill active"><i class="fa-solid fa-book"></i> Books</a>
+  <a href="#orders" class="filter-pill"><i class="fa-solid fa-box"></i> Orders</a>
+  <a href="#subscribers" class="filter-pill"><i class="fa-solid fa-envelope"></i> Subscribed Users</a>
+  <a href="#stock" class="filter-pill"><i class="fa-solid fa-triangle-exclamation"></i> Low Stock</a>
+</div>
+
+<section class="admin-focus">
+  <div class="admin-focus-copy">
+    <span class="eyebrow"><i class="fa-solid fa-chart-simple"></i> Admin focus</span>
+    <h2>Today&apos;s Dashboard</h2>
+    <p>Jump into books, order updates, subscribers, and stock checks from one clean control surface.</p>
+  </div>
+  <div class="admin-focus-grid">
+    <a href="#books" class="admin-focus-item">
+      <i class="fa-solid fa-book-open-reader"></i>
+      <strong>{{ book_result_count }}</strong>
+      <span>visible books</span>
+    </a>
+    <a href="#orders" class="admin-focus-item">
+      <i class="fa-solid fa-truck-fast"></i>
+      <strong>{{ recent_orders|length }}</strong>
+      <span>recent orders</span>
+    </a>
+    <a href="#subscribers" class="admin-focus-item">
+      <i class="fa-solid fa-user-check"></i>
+      <strong>{{ subscriber_count }}</strong>
+      <span>active users</span>
+    </a>
+    <a href="#stock" class="admin-focus-item is-warning">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <strong>{{ low_stock_count }}</strong>
+      <span>low stock</span>
+    </a>
+  </div>
+</section>
+
+<div class="admin-tab-panels">
+<section class="admin-panel admin-wide" id="books" data-admin-tab-panel="books">
+  <div class="admin-section-head">
+    <h2>Add New Book</h2>
+  </div>
+  <form method="POST" class="admin-book-form">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="add_book">
+    {{ book_form.as_p }}
+    <button type="submit" class="btn-primary"><i class="fa-solid fa-plus"></i> Add Book</button>
+  </form>
+</section>
+
+<section class="admin-panel admin-wide" data-admin-tab-panel="books">
+  <div class="admin-section-head">
+    <h2>Manage Books</h2>
+    <span>{{ book_result_count }} found / {{ book_count }} total</span>
+  </div>
+  <form method="GET" action="{% url 'staff_dashboard' %}#books" class="admin-book-search">
+    <div class="admin-search-field">
+      <label for="book_q">Find book</label>
+      <input id="book_q" type="search" name="book_q" value="{{ book_search_query }}"
+             placeholder="Search title or author">
+    </div>
+    <div class="admin-search-field">
+      <label for="book_genre">Category</label>
+      <select id="book_genre" name="book_genre">
+        <option value="">All categories</option>
+        {% for value,label in book_form.fields.genre.choices %}
+        <option value="{{ value }}" {% if book_search_genre == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Find</button>
+    {% if book_search_query or book_search_genre %}
+    <a href="{% url 'staff_dashboard' %}#books" class="btn-small">Clear</a>
+    {% endif %}
+  </form>
+  <div class="admin-table-scroll">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Genre</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for book in books %}
+        <tr>
+          <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_book">
+            <input type="hidden" name="book_id" value="{{ book.id }}">
+            <td><input type="text" name="title" value="{{ book.title }}"></td>
+            <td><input type="text" name="author" value="{{ book.author }}"></td>
+            <td>
+              <select name="genre">
+                {% for value,label in book_form.fields.genre.choices %}
+                <option value="{{ value }}" {% if book.genre == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td><input type="number" name="price" value="{{ book.price }}" step="0.01" min="0"></td>
+            <td><input type="number" name="stock" value="{{ book.stock }}" min="0"></td>
+            <td class="admin-actions-cell">
+              <input type="hidden" name="description" value="{{ book.description }}">
+              <input type="hidden" name="cover_url" value="{{ book.cover_url }}">
+              <button type="submit" class="btn-small"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+          </form>
+              <form method="POST" class="inline-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete_book">
+                <input type="hidden" name="book_id" value="{{ book.id }}">
+                <button type="submit" class="btn-remove"><i class="fa-solid fa-trash"></i> Delete</button>
+              </form>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="admin-empty-cell">No books matched your search.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="admin-grid">
+  <section class="admin-panel" id="orders" data-admin-tab-panel="orders">
+    <div class="admin-section-head">
+      <h2>Recent Orders</h2>
+    </div>
+    {% for order in recent_orders %}
+    <form method="POST" class="admin-row admin-order-row">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="update_order">
+      <input type="hidden" name="order_id" value="{{ order.id }}">
+      <div>
+        <strong>#{{ order.id }} - {{ order.full_name }}</strong>
+        <span>₹{{ order.total_amount }} / {{ order.created_at|date:"M j, Y" }} / {{ order.get_payment_method_display }}</span>
+      </div>
+      <div class="admin-row-actions">
+        <select name="status">
+          {% for value,label in order_status_choices %}
+          <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <select name="payment_status">
+          {% for value,label in payment_status_choices %}
+          <option value="{{ value }}" {% if order.payment_status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn-small">Update</button>
+        <a href="{% url 'bill' order.id %}" class="btn-small">Bill</a>
+      </div>
+    </form>
+    {% empty %}
+    <p class="muted-copy">No orders yet.</p>
+    {% endfor %}
+  </section>
+
+  <section class="admin-panel" id="stock" data-admin-tab-panel="stock">
+    <div class="admin-section-head">
+      <h2>Low Stock</h2>
+    </div>
+    {% for book in low_stock_books %}
+    <div class="admin-row">
+      <div>
+        <strong>{{ book.title }}</strong>
+        <span>{{ book.author }}</span>
+      </div>
+      <span class="stock-count">{{ book.stock }} left</span>
+    </div>
+    {% empty %}
+    <p class="muted-copy">Inventory looks healthy.</p>
+    {% endfor %}
+  </section>
+</div>
+
+<section class="admin-panel admin-wide" id="subscribers" data-admin-tab-panel="subscribers">
+  <div class="admin-section-head">
+    <h2>Subscribed Users</h2>
+    <span>{{ subscriber_count }} active</span>
+  </div>
+  {% for subscriber in subscribers %}
+  <form method="POST" class="admin-row">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="toggle_subscriber">
+    <input type="hidden" name="subscriber_id" value="{{ subscriber.id }}">
+    <div>
+      <strong>{{ subscriber.email }}</strong>
+      <span>{{ subscriber.name|default:"Reader" }} / {{ subscriber.subscribed_at|date:"M j, Y" }}</span>
+    </div>
+    <button type="submit" class="btn-small">
+      {% if subscriber.is_active %}Deactivate{% else %}Activate{% endif %}
+    </button>
+  </form>
+  {% empty %}
+  <p class="muted-copy">No subscribed users yet.</p>
+  {% endfor %}
+</section>
+</div>
+{% endblock %}

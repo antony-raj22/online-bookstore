@@ -1,0 +1,91 @@
+{% extends 'store/base.html' %}
+{% block title %}Bill #{{ order.id }} | BookStore{% endblock %}
+
+{% block content %}
+<div class="page-hero receipt-actions">
+  <div>
+    <span class="eyebrow">Payment bill</span>
+    <h1>Invoice #{{ order.id }}</h1>
+  </div>
+  <button type="button" class="btn-secondary" onclick="window.print()">
+    <i class="fa-solid fa-print"></i> Print Bill
+  </button>
+</div>
+
+<section class="receipt">
+  <div class="receipt-top">
+    <div>
+      <h2>BookStore</h2>
+      <p>Thank you for shopping with us.</p>
+    </div>
+    <div class="receipt-meta">
+      <span>Order #{{ order.id }}</span>
+      <span>{{ order.created_at|date:"F j, Y" }}</span>
+      <span>{{ order.tracking_number|default:"Tracking pending" }}</span>
+    </div>
+  </div>
+
+  <div class="receipt-grid">
+    <div>
+      <h3>Bill To</h3>
+      <p>{{ order.full_name }}</p>
+      <p>{{ order.address }}</p>
+      <p>{{ order.city }} - {{ order.postal_code }}</p>
+    </div>
+    <div>
+      <h3>Payment</h3>
+      <p>{{ order.get_payment_method_display }}</p>
+      <p>{{ order.get_payment_status_display }}</p>
+      {% if order.razorpay_payment_id %}<p>{{ order.razorpay_payment_id }}</p>{% endif %}
+      <p>{{ order.get_status_display }}</p>
+    </div>
+  </div>
+
+  <div class="receipt-table-wrap">
+    <table class="cart-table receipt-table">
+      <thead>
+        <tr>
+          <th>Book</th>
+          <th>Qty</th>
+          <th>Price</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in order.items.all %}
+        <tr>
+          <td>{{ item.book.title }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>₹{{ item.price }}</td>
+          <td>₹{{ item.line_total }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="receipt-total">
+    <span>Subtotal</span>
+    <strong>Rs.{{ order.subtotal_amount }}</strong>
+  </div>
+  {% if order.discount_amount %}
+  <div class="receipt-total">
+    <span>Subscribed User Discount (10%)</span>
+    <strong>-Rs.{{ order.discount_amount }}</strong>
+  </div>
+  {% endif %}
+  <div class="receipt-total">
+    <span>Total Paid</span>
+    <strong>₹{{ order.total_amount }}</strong>
+  </div>
+
+  <div class="receipt-footer-actions">
+    <a href="{% url 'track_order' %}?order_id={{ order.id }}&postal_code={{ order.postal_code }}" class="btn-primary">
+      <i class="fa-solid fa-location-dot"></i> Track Order
+    </a>
+    <a href="{% url 'order_history' %}" class="btn-secondary">
+      <i class="fa-solid fa-clock-rotate-left"></i> My Orders
+    </a>
+  </div>
+</section>
+{% endblock %}

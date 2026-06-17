@@ -54,6 +54,9 @@ online-bookstore/
       src/
         main.jsx
         styles.css
+    templates/
+      registration/
+      store/
     static/
       js/
       store/css/
@@ -212,7 +215,8 @@ The existing Django views also contain checkout, subscription, order, payment, s
 - Django settings: `backend/bookstore_project/settings.py`
 - React entry point: `frontend/react-app/src/main.jsx`
 - React styles: `frontend/react-app/src/styles.css`
-- Static legacy assets: `frontend/static/`
+- Django templates: `frontend/templates/`
+- Static Django assets: `frontend/static/`
 
 ## Git And GitHub
 

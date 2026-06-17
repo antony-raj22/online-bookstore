@@ -1,0 +1,47 @@
+{% extends 'store/base.html' %}
+{% block title %}Track Order | BookStore{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <span class="eyebrow">Order tracking</span>
+  <h1>Track Your Books</h1>
+</div>
+
+<div class="tracking-layout">
+  <form method="GET" class="tracking-form">
+    {{ form.as_p }}
+    <button type="submit" class="btn-primary">
+      <i class="fa-solid fa-magnifying-glass-location"></i> Track Order
+    </button>
+  </form>
+
+  {% if order %}
+  <section class="tracking-result">
+    <div class="order-card-header">
+      <div>
+        <div class="order-id">Order #{{ order.id }}</div>
+        <div class="order-date">Tracking {{ order.tracking_number|default:"will be assigned soon" }}</div>
+      </div>
+      <span class="status-pill status-{{ order.status }}">{{ order.get_status_display }}</span>
+    </div>
+
+    <div class="tracking-steps">
+      <div class="tracking-step active"><i class="fa-solid fa-receipt"></i><span>Placed</span></div>
+      <div class="tracking-step {% if order.status != 'pending' %}active{% endif %}"><i class="fa-solid fa-box"></i><span>Processing</span></div>
+      <div class="tracking-step {% if order.status == 'shipped' or order.status == 'delivered' %}active{% endif %}"><i class="fa-solid fa-truck"></i><span>Shipped</span></div>
+      <div class="tracking-step {% if order.status == 'delivered' %}active{% endif %}"><i class="fa-solid fa-circle-check"></i><span>Delivered</span></div>
+    </div>
+
+    <div class="order-card-body">
+      {% for item in order.items.all %}
+      <div class="order-item">
+        <span class="order-item-qty">x{{ item.quantity }}</span>
+        <span class="order-item-title">{{ item.book.title }}</span>
+        <span class="order-item-price">₹{{ item.price }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

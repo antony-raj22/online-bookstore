@@ -116,6 +116,7 @@ function App() {
           {route.name === 'home' && (
             <HomePage
               categories={categories}
+              activeQuery={route.q || ''}
               activeGenre={route.genre || ''}
               isSubscribed={user.is_subscribed}
               onOpenBook={(id) => navigate({ name: 'book', id })}
@@ -208,14 +209,14 @@ function Navbar({ cartCount, user, theme, onTheme, onNavigate }) {
   );
 }
 
-function HomePage({ categories, activeGenre, isSubscribed, onOpenBook, onAdd, onNavigate }) {
+function HomePage({ categories, activeQuery, activeGenre, isSubscribed, onOpenBook, onAdd, onNavigate }) {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({ q: '', genre: activeGenre, availability: '', sort: 'newest' });
+  const [filters, setFilters] = useState({ q: activeQuery, genre: activeGenre, availability: '', sort: 'newest' });
 
   useEffect(() => {
-    setFilters((current) => ({ ...current, genre: activeGenre }));
-  }, [activeGenre]);
+    setFilters((current) => ({ ...current, q: activeQuery, genre: activeGenre }));
+  }, [activeQuery, activeGenre]);
 
   useEffect(() => {
     const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value)).toString();

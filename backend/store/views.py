@@ -628,8 +628,9 @@ def api_update_cart(request):
             cart.pop(key, None)
             continue
 
-        if requested_qty > 0:
-            cart[key] = min(requested_qty, book.stock)
+        adjusted_qty = min(requested_qty, book.stock)
+        if adjusted_qty > 0:
+            cart[key] = adjusted_qty
         else:
             cart.pop(key, None)
 

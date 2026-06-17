@@ -1,0 +1,215 @@
+{% extends 'store/base.html' %}
+{% block title %}Subscribe | BookStore{% endblock %}
+
+{% block content %}
+<div class="subscribe-hero">
+  <div class="subscribe-hero-bg"></div>
+  <div class="subscribe-hero-content">
+    <span class="sub-eyebrow"><i class="fa-solid fa-crown"></i> BookStore Subscription</span>
+    <h1>Read More, Spend Less</h1>
+    <p>Choose a plan, become subscribed after payment, and get 10% off book orders plus early new-arrival alerts.</p>
+  </div>
+</div>
+
+<div class="subscribe-card-wrap">
+  <div class="subscribe-card">
+    <div class="subscribe-card-left">
+      {% if active_subscription %}
+      <h2><i class="fa-solid fa-circle-check"></i> Your Active Plan</h2>
+      <p class="sub-desc">You are already subscribed. Your current plan validity and benefits are shown here.</p>
+
+      <div class="sub-plan-group">
+        <div class="sub-plan-options">
+          <div class="sub-plan-card">
+            <span class="sub-plan-name">{{ active_subscription.get_plan_display }}</span>
+            <strong>Rs.{{ active_subscription.plan_price }}</strong>
+            <small>Active paid plan</small>
+          </div>
+          <div class="sub-plan-card">
+            <span class="sub-plan-name">Valid Until</span>
+            <strong>{{ active_subscription.expires_at|date:"M j, Y" }}</strong>
+            {% if has_expiry %}
+              <small>{{ days_remaining }} day{{ days_remaining|pluralize }} remaining</small>
+            {% else %}
+              <small>No expiry date</small>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="sub-interests">
+        <p class="sub-interests-label">
+          <i class="fa-solid fa-heart fa-fw"></i> Reading interests
+        </p>
+        <div class="sub-tags">
+          {% for genre in subscribed_genres %}
+            <span class="sub-tag">{{ genre }}</span>
+          {% empty %}
+            <span class="sub-tag">All categories</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <p class="sub-disclaimer">
+        <i class="fa-solid fa-tags"></i> Your 10% subscribed-user discount is applied automatically at checkout.
+      </p>
+      <div class="sub-action-row">
+        <a href="{% url 'home' %}" class="btn-secondary"><i class="fa-solid fa-book-open"></i> Browse Books</a>
+        {% if cart_count %}
+          <a href="{% url 'checkout' %}" class="btn-primary"><i class="fa-solid fa-cart-shopping"></i> Checkout With Discount</a>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% if active_subscription %}
+      <h2><i class="fa-solid fa-rotate"></i> Renew or Change Plan</h2>
+      <p class="sub-desc">Choose a new plan and complete payment to update your subscription validity.</p>
+      {% else %}
+      <h2><i class="fa-solid fa-ticket"></i> Start Your Plan</h2>
+      <p class="sub-desc">Pick the billing period that suits you. Existing subscribed users can use the same email to change plans.</p>
+      {% endif %}
+
+      <form method="POST" action="{% url 'subscribe' %}" class="sub-form" id="subscribeForm">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-error">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="sub-input-row">
+          <div class="sub-field">
+            <label for="sub_name"><i class="fa-solid fa-user fa-fw"></i> Your Name</label>
+            <input type="text" id="sub_name" name="name"
+                   placeholder="e.g. Priya Sharma"
+                   value="{{ form.name.value|default:'' }}">
+            {% if form.name.errors %}
+              <ul class="field-errors">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+          <div class="sub-field">
+            <label for="sub_email"><i class="fa-solid fa-envelope fa-fw"></i> Email Address <span style="color:var(--red)">*</span></label>
+            <input type="email" id="sub_email" name="email"
+                   placeholder="you@example.com" required
+                   value="{{ form.email.value|default:'' }}">
+            {% if form.email.errors %}
+              <ul class="field-errors">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+          <div class="sub-field">
+            <label for="sub_mobile_number"><i class="fa-solid fa-phone fa-fw"></i> Mobile Number <span style="color:var(--red)">*</span></label>
+            <input type="tel" id="sub_mobile_number" name="mobile_number"
+                   placeholder="+91 98765 43210" required autocomplete="tel" inputmode="tel"
+                   value="{{ form.mobile_number.value|default:'' }}">
+            {% if form.mobile_number.errors %}
+              <ul class="field-errors">{% for e in form.mobile_number.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="sub-plan-group">
+          <p class="sub-interests-label">
+            <i class="fa-solid fa-wallet fa-fw"></i> Select subscription plan
+          </p>
+          <div class="sub-plan-options">
+            {% for value,label in form.plan.field.choices %}
+            <label class="sub-plan-card">
+              <input type="radio" name="plan" value="{{ value }}"
+                     {% if form.plan.value|default:'monthly' == value %}checked{% endif %}>
+              <span class="sub-plan-name">
+                {% if value == 'monthly' %}1 Month{% elif value == 'quarterly' %}3 Months{% else %}Yearly{% endif %}
+              </span>
+              <strong>
+                {% if value == 'monthly' %}Rs.100{% elif value == 'quarterly' %}Rs.250{% else %}Rs.900{% endif %}
+              </strong>
+              {% if value == 'quarterly' %}<small>Save Rs.50</small>{% endif %}
+              {% if value == 'yearly' %}<small>Best value</small>{% endif %}
+            </label>
+            {% endfor %}
+          </div>
+          {% if form.plan.errors %}
+            <ul class="field-errors">{% for e in form.plan.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+
+        <div class="sub-interests">
+          <p class="sub-interests-label">
+            <i class="fa-solid fa-heart fa-fw"></i> What do you love reading? <em>(pick any)</em>
+          </p>
+          <div class="sub-tags">
+            {% for value,label in form.genre.field.choices %}
+            <label class="sub-tag">
+              <input type="checkbox" name="genre" value="{{ value }}"
+                     {% if value in form.genre.value %}checked{% endif %}>
+              {{ label }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <button type="submit" class="sub-submit-btn">
+          <i class="fa-solid fa-circle-check"></i>
+          {% if active_subscription %}Continue to Renewal Payment{% else %}Subscribe{% endif %}
+        </button>
+
+        <p class="sub-disclaimer">
+          <i class="fa-solid fa-shield-halved"></i> Secure subscription records. You can update your plan anytime.
+        </p>
+      </form>
+    </div>
+
+    <div class="subscribe-card-right">
+      <div class="perks-title"><i class="fa-solid fa-gift"></i> Plan Benefits</div>
+      <ul class="perks-list">
+        <li class="perk-item">
+          <span class="perk-icon"><i class="fa-solid fa-book-open"></i></span>
+          <div>
+            <strong>Curated Book Picks</strong>
+            <span>Curated titles based on your genre preferences</span>
+          </div>
+        </li>
+        <li class="perk-item">
+          <span class="perk-icon"><i class="fa-solid fa-tags"></i></span>
+          <div>
+            <strong>Exclusive Deals</strong>
+            <span>10% discount on book orders for active subscribed users</span>
+          </div>
+        </li>
+        <li class="perk-item">
+          <span class="perk-icon"><i class="fa-solid fa-bell"></i></span>
+          <div>
+            <strong>New Arrival Alerts</strong>
+            <span>First to know when your favorite categories get new books</span>
+          </div>
+        </li>
+        <li class="perk-item">
+          <span class="perk-icon"><i class="fa-solid fa-calendar-days"></i></span>
+          <div>
+            <strong>Flexible Durations</strong>
+            <span>1 month for Rs.100, 3 months for Rs.250, yearly for Rs.900 with clear validity dates</span>
+          </div>
+        </li>
+      </ul>
+
+      <div class="sub-social-proof">
+        <div class="sub-avatars">
+          <img src="https://i.pravatar.cc/36?img=1" alt="reader">
+          <img src="https://i.pravatar.cc/36?img=5" alt="reader">
+          <img src="https://i.pravatar.cc/36?img=9" alt="reader">
+          <img src="https://i.pravatar.cc/36?img=13" alt="reader">
+        </div>
+        <span><strong>40,000+</strong> readers already discovering better books</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="trust-strip">
+  <div class="trust-item"><i class="fa-solid fa-shield-halved"></i> 100% Secure &amp; Private</div>
+  <div class="trust-sep">/</div>
+  <div class="trust-item"><i class="fa-solid fa-receipt"></i> Clear Plan Pricing</div>
+  <div class="trust-sep">/</div>
+  <div class="trust-item"><i class="fa-solid fa-rotate"></i> Update Anytime</div>
+  <div class="trust-sep">/</div>
+  <div class="trust-item"><i class="fa-solid fa-envelope"></i> Reader Alerts</div>
+</div>
+{% endblock %}

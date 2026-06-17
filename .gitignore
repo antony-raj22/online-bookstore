@@ -17,6 +17,7 @@ htmlcov/
 # Frontend dependencies/build output
 frontend/react-app/node_modules/
 frontend/react-app/dist/
+frontend/react-app/*.log
 
 # Keep screenshot PNGs for README, ignore local verification scripts.
 output/playwright/*.js
