@@ -124,6 +124,37 @@ Open:
 http://127.0.0.1:8001/
 ```
 
+## React Frontend
+
+A React/Vite frontend is available in `frontend/react-app`. It uses the Django app for JSON APIs, sessions, cart data, checkout, auth, and subscription flows.
+
+Run Django first:
+
+```powershell
+python manage.py runserver
+```
+
+Then run React in another terminal:
+
+```powershell
+cd frontend\react-app
+npm install
+npm run dev
+```
+
+Open:
+
+```text
+http://127.0.0.1:5173/
+```
+
+Build React for production:
+
+```powershell
+cd frontend\react-app
+npm run build
+```
+
 ## Environment Variables
 
 Copy `.env.example` to `.env`.

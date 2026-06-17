@@ -16,6 +16,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.crypto import get_random_string
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
 from .forms import AdminBookForm, AdminOrderStatusForm, CancelOrderForm, CheckoutForm, PaymentForm, SubscribeForm, TrackingForm, UserRegisterForm
@@ -65,6 +66,7 @@ def _cart_json_payload(cart):
         'items': [
             {
                 'book_id': item['book'].id,
+                'book': _book_payload(item['book']),
                 'quantity': item['quantity'],
                 'subtotal': f"{item['subtotal']:.2f}",
             }
@@ -74,6 +76,38 @@ def _cart_json_payload(cart):
         'line_count': len(cart_items),
         'total': f"{total:.2f}",
     }
+
+
+def _book_payload(book):
+    return {
+        'id': book.id,
+        'title': book.title,
+        'author': book.author,
+        'description': book.description,
+        'price': f"{book.price:.2f}",
+        'cover_url': book.cover_url,
+        'stock': book.stock,
+        'genre': book.genre,
+        'genre_label': book.get_genre_display_name(),
+        'is_new': book.is_new,
+    }
+
+
+def _category_payload(slug, meta):
+    return {
+        'slug': slug,
+        'name': meta['name'],
+        'description': meta['desc'],
+    }
+
+
+def _json_body(request):
+    if not request.body:
+        return {}
+    try:
+        return json.loads(request.body.decode('utf-8'))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return {}
 
 
 def _active_subscription_for_user(user):
@@ -469,6 +503,146 @@ def support_chat(request):
             'Contact support',
         ],
     })
+
+
+@ensure_csrf_cookie
+def api_bootstrap(request):
+    active_subscription = _active_subscription_for_user(request.user)
+    return JsonResponse({
+        'user': {
+            'is_authenticated': request.user.is_authenticated,
+            'is_staff': request.user.is_staff if request.user.is_authenticated else False,
+            'name': request.user.get_full_name() or request.user.username if request.user.is_authenticated else '',
+            'email': request.user.email if request.user.is_authenticated else '',
+            'is_subscribed': bool(active_subscription),
+        },
+        'cart': _cart_json_payload(request.session.get('cart', {})),
+        'categories': [_category_payload(slug, meta) for slug, meta in CATEGORY_META.items()],
+    })
+
+
+def api_books(request):
+    books = Book.objects.all()
+    query = request.GET.get('q', '').strip()
+    genre = request.GET.get('genre', '').strip()
+    availability = request.GET.get('availability', '').strip()
+    sort = request.GET.get('sort', 'newest').strip()
+
+    if query:
+        books = books.filter(
+            Q(title__icontains=query)
+            | Q(author__icontains=query)
+            | Q(description__icontains=query)
+        )
+    if genre:
+        books = books.filter(genre=genre)
+    if availability == 'in_stock':
+        books = books.filter(stock__gt=0)
+    elif availability == 'new':
+        books = books.filter(created_at__gte=timezone.now() - timezone.timedelta(days=30))
+
+    sort_map = {
+        'newest': '-created_at',
+        'price_low': 'price',
+        'price_high': '-price',
+        'title': 'title',
+        'stock': '-stock',
+    }
+    books = books.order_by(sort_map.get(sort, '-created_at'))
+    return JsonResponse({
+        'books': [_book_payload(book) for book in books],
+        'filters': {
+            'query': query,
+            'genre': genre,
+            'availability': availability,
+            'sort': sort,
+        },
+    })
+
+
+def api_book_detail(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+    related_books = list(Book.objects.filter(genre=book.genre).exclude(id=book.id).order_by('-created_at')[:4])
+    if not related_books:
+        related_books = list(Book.objects.exclude(id=book.id).order_by('-created_at')[:4])
+    return JsonResponse({
+        'book': _book_payload(book),
+        'related_books': [_book_payload(related) for related in related_books],
+    })
+
+
+def api_categories(request):
+    categories = []
+    counts = dict(Book.objects.values_list('genre').annotate(total=Count('id')))
+    for slug, meta in CATEGORY_META.items():
+        category = _category_payload(slug, meta)
+        category['book_count'] = counts.get(slug, 0)
+        categories.append(category)
+    return JsonResponse({'categories': categories})
+
+
+def api_cart(request):
+    return JsonResponse(_cart_json_payload(request.session.get('cart', {})))
+
+
+@require_POST
+def api_add_to_cart(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+    if book.stock <= 0:
+        return JsonResponse({'error': f'{book.title} is currently out of stock.'}, status=400)
+
+    cart = request.session.get('cart', {})
+    current_quantity = int(cart.get(str(book_id), 0))
+    if current_quantity >= book.stock:
+        return JsonResponse({'error': f'Only {book.stock} copy/copies of {book.title} are available.'}, status=400)
+
+    cart[str(book_id)] = current_quantity + 1
+    request.session['cart'] = cart
+    payload = _cart_json_payload(cart)
+    payload['message'] = f'{book.title} added to cart.'
+    return JsonResponse(payload)
+
+
+@require_POST
+def api_update_cart(request):
+    cart = request.session.get('cart', {})
+    body = _json_body(request)
+    updates = body.get('items', body)
+
+    if isinstance(updates, list):
+        updates = {
+            str(item.get('book_id')): item.get('quantity')
+            for item in updates
+            if isinstance(item, dict) and item.get('book_id') is not None
+        }
+
+    if not isinstance(updates, dict):
+        return JsonResponse({'error': 'Send a JSON object of book_id to quantity.'}, status=400)
+
+    for raw_book_id, raw_quantity in updates.items():
+        key = str(raw_book_id)
+        try:
+            requested_qty = int(raw_quantity)
+            book = Book.objects.get(id=int(key))
+        except (TypeError, ValueError, Book.DoesNotExist):
+            cart.pop(key, None)
+            continue
+
+        if requested_qty > 0:
+            cart[key] = min(requested_qty, book.stock)
+        else:
+            cart.pop(key, None)
+
+    request.session['cart'] = cart
+    return JsonResponse(_cart_json_payload(cart))
+
+
+@require_POST
+def api_remove_from_cart(request, book_id):
+    cart = request.session.get('cart', {})
+    cart.pop(str(book_id), None)
+    request.session['cart'] = cart
+    return JsonResponse(_cart_json_payload(cart))
 
 
 def home(request):

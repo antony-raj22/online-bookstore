@@ -3,6 +3,16 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
+    # React/API frontend
+    path('api/bootstrap/',             views.api_bootstrap,    name='api_bootstrap'),
+    path('api/books/',                 views.api_books,        name='api_books'),
+    path('api/books/<int:book_id>/',   views.api_book_detail,  name='api_book_detail'),
+    path('api/categories/',            views.api_categories,   name='api_categories'),
+    path('api/cart/',                  views.api_cart,         name='api_cart'),
+    path('api/cart/add/<int:book_id>/', views.api_add_to_cart, name='api_add_to_cart'),
+    path('api/cart/update/',           views.api_update_cart,  name='api_update_cart'),
+    path('api/cart/remove/<int:book_id>/', views.api_remove_from_cart, name='api_remove_from_cart'),
+
     # Home & books
     path('',                           views.home,             name='home'),
     path('book/<int:book_id>/',        views.book_detail,      name='book_detail'),

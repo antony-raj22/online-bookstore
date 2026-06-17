@@ -1,0 +1,80 @@
+.react-link,
+.react-card-button,
+.react-image-button,
+.react-title-button,
+.footer-nav-col button {
+  font: inherit;
+}
+
+.react-link {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.react-card-button,
+.react-image-button,
+.react-title-button {
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.react-card-button {
+  border: 0;
+  width: 100%;
+}
+
+.react-image-button {
+  border: 0;
+  display: block;
+  padding: 0;
+  width: 100%;
+}
+
+.react-title-button {
+  background: transparent;
+  border: 0;
+  display: block;
+  padding: 0;
+  width: 100%;
+}
+
+.mood-finder button,
+.footer-nav-col button {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.mood-finder button {
+  border-bottom: 1px solid currentColor;
+  font-weight: 800;
+}
+
+.footer-nav-col button {
+  display: block;
+  margin: 0 0 10px;
+}
+
+.react-toast {
+  bottom: 24px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  left: 50%;
+  max-width: min(460px, calc(100vw - 32px));
+  position: fixed;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
+
+.book-cover-wrap {
+  overflow: hidden;
+}
+
+.cart-summary .btn-secondary {
+  width: 100%;
+}

@@ -14,6 +14,13 @@ staticfiles/
 .coverage
 htmlcov/
 
+# Frontend dependencies/build output
+frontend/react-app/node_modules/
+frontend/react-app/dist/
+
 # Keep screenshot PNGs for README, ignore local verification scripts.
 output/playwright/*.js
+output/playwright/*before*.png
+output/playwright/react-*.png
+output/playwright/admin-modules-mobile.png
 output/*.sqlite3
