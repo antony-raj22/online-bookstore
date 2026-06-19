@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'store',
+    'store.apps.StoreConfig',
     'social_django',
 ]
 
@@ -142,6 +142,7 @@ DEFAULT_FROM_EMAIL = os.getenv(
 )
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+TEST_RUNNER = 'bookstore_project.test_runner.StoreDiscoverRunner'
 
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', '')
 RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
